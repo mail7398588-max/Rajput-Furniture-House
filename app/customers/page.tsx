@@ -5,7 +5,12 @@ import { supabase } from '@/lib/supabase'
 const db = () => supabase()
 import type { Customer } from '@/lib/types'
 import Modal from '@/components/Modal'
-import { Plus, Search, Edit, Trash2 } from 'lucide-react'
+import Pagination from '@/components/Pagination'
+import { useToast } from '@/components/Toast'
+import { exportToCSV } from '@/lib/export'
+import { Plus, Search, Edit, Trash2, Download } from 'lucide-react'
+
+const ROWS_PER_PAGE = 15
 
 const statusColors: Record<string, string> = {
   Pending: 'bg-yellow-100 text-yellow-800',
@@ -33,28 +38,37 @@ const emptyCustomer: Omit<Customer, 'id' | 'created_at' | 'updated_at' | 'remain
 export default function CustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([])
   const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
   const [search, setSearch] = useState('')
   const [filterStatus, setFilterStatus] = useState('All')
   const [modalOpen, setModalOpen] = useState(false)
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null)
   const [form, setForm] = useState(emptyCustomer)
+  const [page, setPage] = useState(1)
+  const toast = useToast()
 
   useEffect(() => {
     fetchCustomers()
   }, [])
 
   async function fetchCustomers() {
-    const { data } = await db()
-      .from('customers')
-      .select('*')
-      .order('created_at', { ascending: false })
-    setCustomers((data || []) as Customer[])
-    setLoading(false)
+    try {
+      const { data, error } = await db()
+        .from('customers')
+        .select('*')
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      setCustomers((data || []) as Customer[])
+    } catch (err) {
+      toast('Failed to load customers', 'error')
+    } finally {
+      setLoading(false)
+    }
   }
 
   function openAdd() {
     setEditingCustomer(null)
-    setForm({ ...emptyCustomer, serial_no: customers.length + 1 })
+    setForm({ ...emptyCustomer, serial_no: null })
     setModalOpen(true)
   }
 
@@ -79,23 +93,43 @@ export default function CustomersPage() {
 
   async function handleSave() {
     if (!form.order_no || !form.customer_name) {
-      alert('Order No and Customer Name are required')
+      toast('Order No and Customer Name are required', 'error')
       return
     }
 
-    if (editingCustomer) {
-      await db().from('customers').update(form).eq('id', editingCustomer.id)
-    } else {
-      await db().from('customers').insert([form])
+    setSaving(true)
+    try {
+      if (editingCustomer) {
+        const { error } = await db().from('customers').update(form).eq('id', editingCustomer.id)
+        if (error) throw error
+        toast('Customer updated', 'success')
+      } else {
+        const { error } = await db().from('customers').insert([{ ...form, serial_no: null }])
+        if (error) throw error
+        toast('Customer added', 'success')
+      }
+      setModalOpen(false)
+      await fetchCustomers()
+    } catch (err) {
+      toast('Operation failed', 'error')
+    } finally {
+      setSaving(false)
     }
-    setModalOpen(false)
-    fetchCustomers()
   }
 
   async function handleDelete(id: string) {
     if (!confirm('Are you sure you want to delete this customer?')) return
-    await db().from('customers').delete().eq('id', id)
-    fetchCustomers()
+    setSaving(true)
+    try {
+      const { error } = await db().from('customers').delete().eq('id', id)
+      if (error) throw error
+      toast('Customer deleted', 'success')
+      await fetchCustomers()
+    } catch (err) {
+      toast('Delete failed', 'error')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const filtered = customers.filter((c) => {
@@ -109,6 +143,28 @@ export default function CustomersPage() {
     return matchSearch && matchStatus
   })
 
+  const totalPages = Math.max(1, Math.ceil(filtered.length / ROWS_PER_PAGE))
+  const paged = filtered.slice((page - 1) * ROWS_PER_PAGE, page * ROWS_PER_PAGE)
+
+  function handleSearchChange(value: string) {
+    setSearch(value)
+    setPage(1)
+  }
+
+  function handleStatusChange(value: string) {
+    setFilterStatus(value)
+    setPage(1)
+  }
+
+  function handleExport() {
+    if (filtered.length === 0) {
+      toast('No data to export', 'error')
+      return
+    }
+    exportToCSV(filtered, 'customers')
+    toast('CSV exported', 'success')
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -116,9 +172,14 @@ export default function CustomersPage() {
           <h1 className="text-2xl font-bold text-gray-900">Customer Register</h1>
           <p className="text-sm text-gray-500 mt-1">{customers.length} total customers</p>
         </div>
-        <button onClick={openAdd} className="btn-primary flex items-center gap-2">
-          <Plus size={16} /> Add Customer
-        </button>
+        <div className="flex gap-2">
+          <button onClick={handleExport} className="btn-secondary flex items-center gap-2">
+            <Download size={16} /> Download CSV
+          </button>
+          <button onClick={openAdd} className="btn-primary flex items-center gap-2">
+            <Plus size={16} /> Add Customer
+          </button>
+        </div>
       </div>
 
       <div className="stat-card mb-6">
@@ -129,13 +190,13 @@ export default function CustomersPage() {
               type="text"
               placeholder="Search by name, order no, phone, item..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
               className="input-field pl-10"
             />
           </div>
           <select
             value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
+            onChange={(e) => handleStatusChange(e.target.value)}
             className="input-field w-auto"
           >
             <option value="All">All Status</option>
@@ -173,16 +234,16 @@ export default function CustomersPage() {
                   Loading...
                 </td>
               </tr>
-            ) : filtered.length === 0 ? (
+            ) : paged.length === 0 ? (
               <tr>
                 <td colSpan={12} className="table-cell text-center text-gray-400 py-8">
                   No customers found
                 </td>
               </tr>
             ) : (
-              filtered.map((c, i) => (
+              paged.map((c, i) => (
                 <tr key={c.id} className="border-t border-gray-100 hover:bg-gray-50">
-                  <td className="table-cell">{i + 1}</td>
+                  <td className="table-cell">{(page - 1) * ROWS_PER_PAGE + i + 1}</td>
                   <td className="table-cell font-medium">{c.order_no}</td>
                   <td className="table-cell">
                     {c.order_date ? new Date(c.order_date).toLocaleDateString('en-PK') : '-'}
@@ -203,10 +264,18 @@ export default function CustomersPage() {
                   </td>
                   <td className="table-cell">
                     <div className="flex gap-2">
-                      <button onClick={() => openEdit(c)} className="text-blue-600 hover:text-blue-800">
+                      <button
+                        onClick={() => openEdit(c)}
+                        disabled={saving}
+                        className="text-blue-600 hover:text-blue-800 disabled:opacity-50"
+                      >
                         <Edit size={16} />
                       </button>
-                      <button onClick={() => handleDelete(c.id)} className="text-red-600 hover:text-red-800">
+                      <button
+                        onClick={() => handleDelete(c.id)}
+                        disabled={saving}
+                        className="text-red-600 hover:text-red-800 disabled:opacity-50"
+                      >
                         <Trash2 size={16} />
                       </button>
                     </div>
@@ -216,6 +285,12 @@ export default function CustomersPage() {
             )}
           </tbody>
         </table>
+
+        {filtered.length > ROWS_PER_PAGE && (
+          <div className="mt-4">
+            <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+          </div>
+        )}
       </div>
 
       <Modal
@@ -330,11 +405,11 @@ export default function CustomersPage() {
           </div>
         </div>
         <div className="flex justify-end gap-3 mt-6">
-          <button onClick={() => setModalOpen(false)} className="btn-secondary">
+          <button onClick={() => setModalOpen(false)} className="btn-secondary" disabled={saving}>
             Cancel
           </button>
-          <button onClick={handleSave} className="btn-primary">
-            {editingCustomer ? 'Update' : 'Save'}
+          <button onClick={handleSave} className="btn-primary" disabled={saving}>
+            {saving ? 'Saving...' : editingCustomer ? 'Update' : 'Save'}
           </button>
         </div>
       </Modal>

@@ -5,7 +5,10 @@ import { supabase } from '@/lib/supabase'
 const db = () => supabase()
 import type { Transaction } from '@/lib/types'
 import Modal from '@/components/Modal'
-import { Plus, Search, Trash2 } from 'lucide-react'
+import { Plus, Search, Trash2, Edit } from 'lucide-react'
+import { useToast } from '@/components/Toast'
+import Pagination from '@/components/Pagination'
+import { exportToCSV } from '@/lib/export'
 
 const categories = [
   'Material Purchase',
@@ -20,7 +23,21 @@ const categories = [
 
 const paymentModes = ['Cash', 'Bank Transfer', 'JazzCash', 'EasyPaisa', 'Cheque', 'Other']
 
+const ROWS_PER_PAGE = 15
+
+const defaultForm = {
+  date: new Date().toISOString().split('T')[0],
+  particulars: '',
+  category: '',
+  income: 0,
+  expense: 0,
+  payment_mode: 'Cash',
+  related_order_no: '',
+  notes: '',
+}
+
 export default function IncomeExpensePage() {
+  const { toast } = useToast()
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -28,57 +45,126 @@ export default function IncomeExpensePage() {
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
-  const [form, setForm] = useState({
-    date: new Date().toISOString().split('T')[0],
-    particulars: '',
-    category: '',
-    income: 0,
-    expense: 0,
-    payment_mode: 'Cash',
-    related_order_no: '',
-    notes: '',
-  })
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
+  const [saving, setSaving] = useState(false)
+  const [page, setPage] = useState(1)
+  const [form, setForm] = useState(defaultForm)
 
   useEffect(() => {
     fetchTransactions()
   }, [])
 
   async function fetchTransactions() {
-    const { data } = await db()
-      .from('transactions')
-      .select('*')
-      .order('date', { ascending: false })
-    setTransactions((data || []) as Transaction[])
-    setLoading(false)
+    try {
+      const { data, error } = await db()
+        .from('transactions')
+        .select('*')
+        .order('date', { ascending: false })
+      if (error) throw error
+      setTransactions((data || []) as Transaction[])
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to load transactions'
+      toast(message, 'error')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  function openAddModal() {
+    setEditingTransaction(null)
+    setForm(defaultForm)
+    setModalOpen(true)
+  }
+
+  function openEditModal(t: Transaction) {
+    setEditingTransaction(t)
+    setForm({
+      date: t.date || new Date().toISOString().split('T')[0],
+      particulars: t.particulars || '',
+      category: t.category || '',
+      income: t.income || 0,
+      expense: t.expense || 0,
+      payment_mode: t.payment_mode || 'Cash',
+      related_order_no: t.related_order_no || '',
+      notes: t.notes || '',
+    })
+    setModalOpen(true)
+  }
+
+  function closeModal() {
+    setModalOpen(false)
+    setEditingTransaction(null)
+    setForm(defaultForm)
   }
 
   async function handleSave() {
     if (!form.particulars) {
-      alert('Please enter particulars/details')
+      toast('Please enter particulars/details', 'error')
       return
     }
-    const month = form.date
-      ? new Date(form.date).toLocaleString('en-US', { month: 'short', year: 'numeric' })
-      : ''
-    await db().from('transactions').insert([{ ...form, month }])
-    setModalOpen(false)
-    setForm({
-      date: new Date().toISOString().split('T')[0],
-      particulars: '',
-      category: '',
-      income: 0,
-      expense: 0,
-      payment_mode: 'Cash',
-      related_order_no: '',
-      notes: '',
-    })
-    fetchTransactions()
+    setSaving(true)
+    try {
+      const month = form.date
+        ? new Date(form.date).toLocaleString('en-US', { month: 'short', year: 'numeric' })
+        : ''
+      const payload = { ...form, month }
+
+      if (editingTransaction) {
+        const { error } = await db()
+          .from('transactions')
+          .update(payload)
+          .eq('id', editingTransaction.id)
+        if (error) throw error
+        toast('Transaction updated', 'success')
+      } else {
+        const { error } = await db().from('transactions').insert([payload])
+        if (error) throw error
+        toast('Transaction added', 'success')
+      }
+
+      closeModal()
+      fetchTransactions()
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to save transaction'
+      toast(message, 'error')
+    } finally {
+      setSaving(false)
+    }
   }
 
   async function handleDelete(id: string) {
     if (!confirm('Delete this transaction?')) return
-    await db().from('transactions').delete().eq('id', id)
-    fetchTransactions()
+    try {
+      const { error } = await db().from('transactions').delete().eq('id', id)
+      if (error) throw error
+      toast('Transaction deleted', 'success')
+      fetchTransactions()
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to delete transaction'
+      toast(message, 'error')
+    }
+  }
+
+  function handleExport() {
+    if (!withBalance.length) {
+      toast('No data to export', 'error')
+      return
+    }
+    exportToCSV(
+      withBalance.map((t) => ({
+        Date: t.date || '',
+        Particulars: t.particulars || '',
+        Category: t.category || '',
+        Income: t.income || 0,
+        Expense: t.expense || 0,
+        'Payment Mode': t.payment_mode || '',
+        'Order No': t.related_order_no || '',
+        Balance: t.computedBalance,
+        Notes: t.notes || '',
+      })),
+      'income-expense'
+    )
+    toast('CSV exported', 'success')
   }
 
   const filtered = transactions.filter((t) => {
@@ -96,15 +182,25 @@ export default function IncomeExpensePage() {
     return matchSearch && matchType && matchDateFrom && matchDateTo
   })
 
-  // Calculate running balance
   let runningBalance = 0
   const withBalance = [...filtered].reverse().map((t) => {
     runningBalance += (t.income || 0) - (t.expense || 0)
     return { ...t, computedBalance: runningBalance }
   }).reverse()
 
+  const totalPages = Math.ceil(withBalance.length / ROWS_PER_PAGE)
+  const paged = withBalance.slice((page - 1) * ROWS_PER_PAGE, page * ROWS_PER_PAGE)
+
   const totalIncome = filtered.reduce((sum, t) => sum + (t.income || 0), 0)
   const totalExpense = filtered.reduce((sum, t) => sum + (t.expense || 0), 0)
+
+  function resetFilters() {
+    setSearch('')
+    setFilterType('All')
+    setDateFrom('')
+    setDateTo('')
+    setPage(1)
+  }
 
   return (
     <div>
@@ -115,9 +211,14 @@ export default function IncomeExpensePage() {
             Track daily income and expenditure - automatic balance calculation
           </p>
         </div>
-        <button onClick={() => setModalOpen(true)} className="btn-primary flex items-center gap-2">
-          <Plus size={16} /> Add Entry
-        </button>
+        <div className="flex items-center gap-3">
+          <button onClick={handleExport} className="btn-secondary flex items-center gap-2">
+            Download CSV
+          </button>
+          <button onClick={openAddModal} className="btn-primary flex items-center gap-2">
+            <Plus size={16} /> Add Entry
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -145,13 +246,13 @@ export default function IncomeExpensePage() {
               type="text"
               placeholder="Search..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => { setSearch(e.target.value); setPage(1) }}
               className="input-field pl-10"
             />
           </div>
           <select
             value={filterType}
-            onChange={(e) => setFilterType(e.target.value as typeof filterType)}
+            onChange={(e) => { setFilterType(e.target.value as typeof filterType); setPage(1) }}
             className="input-field w-auto"
           >
             <option value="All">All</option>
@@ -161,14 +262,14 @@ export default function IncomeExpensePage() {
           <input
             type="date"
             value={dateFrom}
-            onChange={(e) => setDateFrom(e.target.value)}
+            onChange={(e) => { setDateFrom(e.target.value); setPage(1) }}
             className="input-field w-auto"
             placeholder="From"
           />
           <input
             type="date"
             value={dateTo}
-            onChange={(e) => setDateTo(e.target.value)}
+            onChange={(e) => { setDateTo(e.target.value); setPage(1) }}
             className="input-field w-auto"
             placeholder="To"
           />
@@ -197,14 +298,14 @@ export default function IncomeExpensePage() {
                   Loading...
                 </td>
               </tr>
-            ) : withBalance.length === 0 ? (
+            ) : paged.length === 0 ? (
               <tr>
                 <td colSpan={9} className="table-cell text-center text-gray-400 py-8">
                   No transactions found
                 </td>
               </tr>
             ) : (
-              withBalance.map((t) => (
+              paged.map((t) => (
                 <tr key={t.id} className="border-t border-gray-100 hover:bg-gray-50">
                   <td className="table-cell">
                     {t.date ? new Date(t.date).toLocaleDateString('en-PK') : '-'}
@@ -227,18 +328,24 @@ export default function IncomeExpensePage() {
                     Rs. {t.computedBalance.toLocaleString()}
                   </td>
                   <td className="table-cell">
-                    <button onClick={() => handleDelete(t.id)} className="text-red-600 hover:text-red-800">
-                      <Trash2 size={16} />
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => openEditModal(t)} className="text-blue-600 hover:text-blue-800">
+                        <Edit size={16} />
+                      </button>
+                      <button onClick={() => handleDelete(t.id)} className="text-red-600 hover:text-red-800">
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))
             )}
           </tbody>
         </table>
+        <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
       </div>
 
-      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title="Add Transaction">
+      <Modal isOpen={modalOpen} onClose={closeModal} title={editingTransaction ? 'Edit Transaction' : 'Add Transaction'}>
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -328,8 +435,10 @@ export default function IncomeExpensePage() {
           </div>
         </div>
         <div className="flex justify-end gap-3 mt-6">
-          <button onClick={() => setModalOpen(false)} className="btn-secondary">Cancel</button>
-          <button onClick={handleSave} className="btn-primary">Save</button>
+          <button onClick={closeModal} className="btn-secondary" disabled={saving}>Cancel</button>
+          <button onClick={handleSave} className="btn-primary" disabled={saving}>
+            {saving ? 'Saving...' : 'Save'}
+          </button>
         </div>
       </Modal>
     </div>

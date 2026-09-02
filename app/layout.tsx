@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Sidebar from "@/components/Sidebar";
+import { ToastProvider } from "@/components/Toast";
 
 export const metadata: Metadata = {
   title: "Rajput Furniture House",
@@ -15,10 +16,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Sidebar />
-        <main className="ml-64 min-h-screen bg-gray-50">
-          {children}
-        </main>
+        <ToastProvider>
+          <Sidebar />
+          <main className="lg:ml-64 min-h-screen bg-gray-50 pt-14 lg:pt-0">
+            {children}
+          </main>
+        </ToastProvider>
       </body>
     </html>
   );

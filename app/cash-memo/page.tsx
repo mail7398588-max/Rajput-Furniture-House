@@ -4,9 +4,25 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 const db = () => supabase()
 import type { Customer, CashMemoItem } from '@/lib/types'
-import { Printer, Plus, Trash2 } from 'lucide-react'
+import { Printer, Plus, Trash2, Save, RotateCcw, FileText } from 'lucide-react'
+import { useToast } from '@/components/Toast'
+
+interface SavedMemo {
+  id: string
+  memo_no: string
+  memo_date: string
+  order_no: string
+  customer_name: string
+  phone: string
+  items: CashMemoItem[]
+  advance_received: number
+  total: number
+  remaining: number
+  created_at: string
+}
 
 export default function CashMemoPage() {
+  const { toast } = useToast()
   const [customers, setCustomers] = useState<Customer[]>([])
   const [selectedOrder, setSelectedOrder] = useState<Customer | null>(null)
   const [memoNo, setMemoNo] = useState('')
@@ -15,18 +31,51 @@ export default function CashMemoPage() {
     { sno: 1, detail: '', rate: 0, qty: 1, amount: 0 },
   ])
   const [advanceReceived, setAdvanceReceived] = useState(0)
+  const [saving, setSaving] = useState(false)
+  const [loadingCustomers, setLoadingCustomers] = useState(true)
+  const [loadingMemos, setLoadingMemos] = useState(true)
+  const [pastMemos, setPastMemos] = useState<SavedMemo[]>([])
+  const [loadingPastMemos, setLoadingPastMemos] = useState(false)
 
   useEffect(() => {
     fetchCustomers()
+    fetchPastMemos()
     setMemoNo(`CM-${Date.now().toString().slice(-6)}`)
   }, [])
 
   async function fetchCustomers() {
-    const { data } = await db()
-      .from('customers')
-      .select('*')
-      .order('created_at', { ascending: false })
-    setCustomers((data || []) as Customer[])
+    setLoadingCustomers(true)
+    try {
+      const { data, error } = await db()
+        .from('customers')
+        .select('*')
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      setCustomers((data || []) as Customer[])
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to load customers'
+      toast(msg, 'error')
+    } finally {
+      setLoadingCustomers(false)
+    }
+  }
+
+  async function fetchPastMemos() {
+    setLoadingMemos(true)
+    try {
+      const { data, error } = await db()
+        .from('cash_memos')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(50)
+      if (error) throw error
+      setPastMemos((data || []) as SavedMemo[])
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to load past memos'
+      toast(msg, 'error')
+    } finally {
+      setLoadingMemos(false)
+    }
   }
 
   function handleOrderSelect(orderNo: string) {
@@ -61,6 +110,57 @@ export default function CashMemoPage() {
   const total = items.reduce((sum, item) => sum + item.amount, 0)
   const remaining = total - advanceReceived
 
+  function resetForm() {
+    setMemoNo(`CM-${Date.now().toString().slice(-6)}`)
+    setMemoDate(new Date().toISOString().split('T')[0])
+    setSelectedOrder(null)
+    setItems([{ sno: 1, detail: '', rate: 0, qty: 1, amount: 0 }])
+    setAdvanceReceived(0)
+    toast('New memo started', 'success')
+  }
+
+  async function saveMemo() {
+    if (!memoNo.trim()) {
+      toast('Memo number is required', 'error')
+      return
+    }
+    setSaving(true)
+    try {
+      const payload = {
+        memo_no: memoNo,
+        memo_date: memoDate,
+        order_no: selectedOrder?.order_no || '',
+        customer_name: selectedOrder?.customer_name || '',
+        phone: selectedOrder?.phone || '',
+        items: items,
+        advance_received: advanceReceived,
+        total: total,
+        remaining: remaining,
+      }
+      const { error } = await db()
+        .from('cash_memos')
+        .insert(payload)
+      if (error) throw error
+      toast('Memo saved successfully', 'success')
+      fetchPastMemos()
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to save memo'
+      toast(msg, 'error')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  function loadMemo(memo: SavedMemo) {
+    setMemoNo(memo.memo_no)
+    setMemoDate(memo.memo_date)
+    setItems(memo.items.length > 0 ? memo.items : [{ sno: 1, detail: '', rate: 0, qty: 1, amount: 0 }])
+    setAdvanceReceived(memo.advance_received)
+    const customer = customers.find((c) => c.order_no === memo.order_no) || null
+    setSelectedOrder(customer)
+    toast(`Loaded memo ${memo.memo_no}`, 'success')
+  }
+
   function handlePrint() {
     window.print()
   }
@@ -72,9 +172,24 @@ export default function CashMemoPage() {
           <h1 className="text-2xl font-bold text-gray-900">Cash Memo Generator</h1>
           <p className="text-sm text-gray-500 mt-1">Generate printable receipts for customers</p>
         </div>
-        <button onClick={handlePrint} className="btn-primary flex items-center gap-2">
-          <Printer size={16} /> Print Memo
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={resetForm}
+            className="btn-secondary flex items-center gap-2"
+          >
+            <RotateCcw size={16} /> New Memo
+          </button>
+          <button
+            onClick={saveMemo}
+            disabled={saving}
+            className="btn-primary flex items-center gap-2"
+          >
+            <Save size={16} /> {saving ? 'Saving...' : 'Save Memo'}
+          </button>
+          <button onClick={handlePrint} className="btn-primary flex items-center gap-2">
+            <Printer size={16} /> Print Memo
+          </button>
+        </div>
       </div>
 
       {/* Form */}
@@ -109,8 +224,9 @@ export default function CashMemoPage() {
                   className="input-field"
                   onChange={(e) => handleOrderSelect(e.target.value)}
                   value={selectedOrder?.order_no || ''}
+                  disabled={loadingCustomers}
                 >
-                  <option value="">Select Order</option>
+                  <option value="">{loadingCustomers ? 'Loading...' : 'Select Order'}</option>
                   {customers.map((c) => (
                     <option key={c.order_no} value={c.order_no}>
                       {c.order_no} - {c.customer_name}
@@ -224,6 +340,44 @@ export default function CashMemoPage() {
           <div className="stat-card">
             <h3 className="font-semibold text-gray-700 mb-2">Preview</h3>
             <p className="text-xs text-gray-400">Click Print to generate the memo</p>
+          </div>
+
+          <div className="stat-card mt-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-gray-700 flex items-center gap-2">
+                <FileText size={16} /> Past Memos
+              </h3>
+              <button
+                onClick={fetchPastMemos}
+                disabled={loadingPastMemos}
+                className="text-xs text-blue-600 hover:text-blue-800"
+              >
+                {loadingPastMemos ? 'Loading...' : 'Refresh'}
+              </button>
+            </div>
+            {loadingMemos ? (
+              <p className="text-sm text-gray-400">Loading memos...</p>
+            ) : pastMemos.length === 0 ? (
+              <p className="text-sm text-gray-400">No saved memos yet</p>
+            ) : (
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {pastMemos.map((memo) => (
+                  <button
+                    key={memo.id}
+                    onClick={() => loadMemo(memo)}
+                    className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors"
+                  >
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium text-gray-700">{memo.memo_no}</span>
+                      <span className="text-xs text-gray-400">{memo.memo_date}</span>
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      {memo.customer_name || 'N/A'} — Rs. {memo.total.toLocaleString()}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

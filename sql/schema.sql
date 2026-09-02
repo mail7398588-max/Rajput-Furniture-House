@@ -108,14 +108,34 @@ create trigger update_customers_updated_at before update on customers
 create trigger update_orders_updated_at before update on orders
   for each row execute function update_updated_at_column();
 
+-- 5. Cash Memos Table
+create table if not exists cash_memos (
+  id uuid default uuid_generate_v4() primary key,
+  memo_no text not null,
+  memo_date date not null default CURRENT_DATE,
+  order_no text,
+  customer_name text,
+  phone text,
+  items jsonb default '[]',
+  advance_received numeric(12,2) default 0,
+  total numeric(12,2) default 0,
+  remaining numeric(12,2) default 0,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+create index if not exists idx_cash_memos_order_no on cash_memos(order_no);
+create index if not exists idx_cash_memos_memo_date on cash_memos(memo_date);
+
 -- RLS (Row Level Security) - Enable but allow all for now
 alter table customers enable row level security;
 alter table orders enable row level security;
 alter table transactions enable row level security;
 alter table attendance enable row level security;
+alter table cash_memos enable row level security;
 
 -- Allow all operations for authenticated and anon users (adjust for production)
 create policy "Allow all on customers" on customers for all using (true) with check (true);
 create policy "Allow all on orders" on orders for all using (true) with check (true);
 create policy "Allow all on transactions" on transactions for all using (true) with check (true);
 create policy "Allow all on attendance" on attendance for all using (true) with check (true);
+create policy "Allow all on cash_memos" on cash_memos for all using (true) with check (true);

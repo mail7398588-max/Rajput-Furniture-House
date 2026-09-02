@@ -5,15 +5,21 @@ import { supabase } from '@/lib/supabase'
 const db = () => supabase()
 import type { Order, Customer } from '@/lib/types'
 import Modal from '@/components/Modal'
-import { Plus, Search, Edit, Trash2 } from 'lucide-react'
+import Pagination from '@/components/Pagination'
+import { useToast } from '@/components/Toast'
+import { exportToCSV } from '@/lib/export'
+import { Plus, Search, Edit, Trash2, Download } from 'lucide-react'
 
 type OrderWithCustomer = Order & { customers?: Customer }
 
 export default function OrdersPage() {
+  const { toast } = useToast()
   const [orders, setOrders] = useState<OrderWithCustomer[]>([])
   const [customers, setCustomers] = useState<Customer[]>([])
   const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
   const [search, setSearch] = useState('')
+  const [page, setPage] = useState(1)
   const [modalOpen, setModalOpen] = useState(false)
   const [editingOrder, setEditingOrder] = useState<OrderWithCustomer | null>(null)
   const [form, setForm] = useState({
@@ -24,18 +30,27 @@ export default function OrdersPage() {
     other_cost: 0,
   })
 
+  const ROWS_PER_PAGE = 15
+
   useEffect(() => {
     fetchData()
   }, [])
 
   async function fetchData() {
-    const [ordersRes, customersRes] = await Promise.all([
-      db().from('orders').select('*, customers(*)').order('created_at', { ascending: false }),
-      db().from('customers').select('*'),
-    ])
-    setOrders((ordersRes.data || []) as OrderWithCustomer[])
-    setCustomers((customersRes.data || []) as Customer[])
-    setLoading(false)
+    try {
+      const [ordersRes, customersRes] = await Promise.all([
+        db().from('orders').select('*, customers(*)').order('created_at', { ascending: false }),
+        db().from('customers').select('*'),
+      ])
+      if (ordersRes.error) throw ordersRes.error
+      if (customersRes.error) throw customersRes.error
+      setOrders((ordersRes.data || []) as OrderWithCustomer[])
+      setCustomers((customersRes.data || []) as Customer[])
+    } catch (err: any) {
+      toast(err.message || 'Failed to fetch data', 'error')
+    } finally {
+      setLoading(false)
+    }
   }
 
   function openAdd() {
@@ -58,22 +73,41 @@ export default function OrdersPage() {
 
   async function handleSave() {
     if (!form.order_no) {
-      alert('Please select an order')
+      toast('Please select an order', 'error')
       return
     }
-    if (editingOrder) {
-      await db().from('orders').update(form).eq('id', editingOrder.id)
-    } else {
-      await db().from('orders').insert([form])
+    setSaving(true)
+    try {
+      let error
+      if (editingOrder) {
+        ;({ error } = await db().from('orders').update(form).eq('id', editingOrder.id))
+      } else {
+        ;({ error } = await db().from('orders').insert([form]))
+      }
+      if (error) throw error
+      toast(editingOrder ? 'Order P&L updated' : 'Order P&L added', 'success')
+      setModalOpen(false)
+      fetchData()
+    } catch (err: any) {
+      toast(err.message || 'Failed to save order P&L', 'error')
+    } finally {
+      setSaving(false)
     }
-    setModalOpen(false)
-    fetchData()
   }
 
   async function handleDelete(id: string) {
     if (!confirm('Delete this order P&L record?')) return
-    await db().from('orders').delete().eq('id', id)
-    fetchData()
+    setSaving(true)
+    try {
+      const { error } = await db().from('orders').delete().eq('id', id)
+      if (error) throw error
+      toast('Order P&L deleted', 'success')
+      fetchData()
+    } catch (err: any) {
+      toast(err.message || 'Failed to delete order P&L', 'error')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const filtered = orders.filter(
@@ -83,9 +117,28 @@ export default function OrdersPage() {
       o.customers?.customer_name?.toLowerCase().includes(search.toLowerCase())
   )
 
+  const totalPages = Math.ceil(filtered.length / ROWS_PER_PAGE)
+  const paginated = filtered.slice((page - 1) * ROWS_PER_PAGE, page * ROWS_PER_PAGE)
+
   const totalRevenue = filtered.reduce((sum, o) => sum + (o.customers?.order_amount || 0), 0)
   const totalExpenses = filtered.reduce((sum, o) => sum + (o.total_expense || 0), 0)
   const totalProfit = totalRevenue - totalExpenses
+
+  function handleExport() {
+    const rows = filtered.map((o) => ({
+      'Order No': o.order_no,
+      'Customer': o.customers?.customer_name || '-',
+      'Order Amount': o.customers?.order_amount || 0,
+      'Material': o.material_cost || 0,
+      'Labour': o.labour_cost || 0,
+      'Transport': o.transport_cost || 0,
+      'Other': o.other_cost || 0,
+      'Total Expense': o.total_expense || 0,
+      'Profit/Loss': (o.customers?.order_amount || 0) - (o.total_expense || 0),
+    }))
+    exportToCSV(rows, 'orders_pnl')
+    toast('CSV exported successfully', 'success')
+  }
 
   return (
     <div>
@@ -94,9 +147,14 @@ export default function OrdersPage() {
           <h1 className="text-2xl font-bold text-gray-900">Orders P&L</h1>
           <p className="text-sm text-gray-500 mt-1">{orders.length} orders tracked</p>
         </div>
-        <button onClick={openAdd} className="btn-primary flex items-center gap-2">
-          <Plus size={16} /> Add Order P&L
-        </button>
+        <div className="flex gap-2">
+          <button onClick={handleExport} className="btn-secondary flex items-center gap-2">
+            <Download size={16} /> Export CSV
+          </button>
+          <button onClick={openAdd} className="btn-primary flex items-center gap-2">
+            <Plus size={16} /> Add Order P&L
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -123,7 +181,10 @@ export default function OrdersPage() {
             type="text"
             placeholder="Search by order no or customer name..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value)
+              setPage(1)
+            }}
             className="input-field pl-10"
           />
         </div>
@@ -152,14 +213,14 @@ export default function OrdersPage() {
                   Loading...
                 </td>
               </tr>
-            ) : filtered.length === 0 ? (
+            ) : paginated.length === 0 ? (
               <tr>
                 <td colSpan={10} className="table-cell text-center text-gray-400 py-8">
                   No orders found
                 </td>
               </tr>
             ) : (
-              filtered.map((o) => {
+              paginated.map((o) => {
                 const revenue = o.customers?.order_amount || 0
                 const pl = revenue - (o.total_expense || 0)
                 return (
@@ -183,10 +244,10 @@ export default function OrdersPage() {
                     </td>
                     <td className="table-cell">
                       <div className="flex gap-2">
-                        <button onClick={() => openEdit(o)} className="text-blue-600 hover:text-blue-800">
+                        <button onClick={() => openEdit(o)} className="text-blue-600 hover:text-blue-800" disabled={saving}>
                           <Edit size={16} />
                         </button>
-                        <button onClick={() => handleDelete(o.id)} className="text-red-600 hover:text-red-800">
+                        <button onClick={() => handleDelete(o.id)} className="text-red-600 hover:text-red-800" disabled={saving}>
                           <Trash2 size={16} />
                         </button>
                       </div>
@@ -197,6 +258,11 @@ export default function OrdersPage() {
             )}
           </tbody>
         </table>
+        {!loading && filtered.length > ROWS_PER_PAGE && (
+          <div className="mt-4">
+            <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+          </div>
+        )}
       </div>
 
       <Modal
@@ -269,11 +335,11 @@ export default function OrdersPage() {
           </div>
         </div>
         <div className="flex justify-end gap-3 mt-6">
-          <button onClick={() => setModalOpen(false)} className="btn-secondary">
+          <button onClick={() => setModalOpen(false)} className="btn-secondary" disabled={saving}>
             Cancel
           </button>
-          <button onClick={handleSave} className="btn-primary">
-            {editingOrder ? 'Update' : 'Save'}
+          <button onClick={handleSave} className="btn-primary" disabled={saving}>
+            {saving ? 'Saving...' : editingOrder ? 'Update' : 'Save'}
           </button>
         </div>
       </Modal>
