@@ -306,25 +306,38 @@ export default function CashMemoPage() {
             </div>
 
             {/* Furniture icons row */}
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', marginBottom: '10px', opacity: 0.15 }}>
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1a1a2e" strokeWidth="1.5">
-                <path d="M3 20V14h18v6M5 14V8a2 2 0 012-2h10a2 2 0 012 2v6M3 14h18"/>
-                <path d="M4 20v2M20 20v2M8 20v2M16 20v2"/>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '28px', marginBottom: '10px', opacity: 0.18 }}>
+              {/* Sofa */}
+              <svg width="32" height="28" viewBox="0 0 32 28" fill="none" stroke="#1a1a2e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 18v4M28 18v4"/>
+                <path d="M6 18V12a2 2 0 012-2h16a2 2 0 012 2v6"/>
+                <path d="M2 16a3 3 0 013-3h22a3 3 0 013 3v2H2v-2z"/>
+                <path d="M6 12V9a1 1 0 011-1h3a1 1 0 011 1v3"/>
+                <path d="M21 12V9a1 1 0 011-1h3a1 1 0 011 1v3"/>
               </svg>
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1a1a2e" strokeWidth="1.5">
-                <rect x="3" y="10" width="18" height="10" rx="1"/>
-                <path d="M7 10V7a5 5 0 0110 0v3"/>
-                <path d="M8 14h8M8 17h5"/>
+              {/* Bed */}
+              <svg width="32" height="28" viewBox="0 0 32 28" fill="none" stroke="#1a1a2e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="14" width="28" height="8" rx="1"/>
+                <path d="M4 14v-3a2 2 0 012-2h4a2 2 0 012 2v3"/>
+                <path d="M20 14v-3a2 2 0 012-2h4a2 2 0 012 2v3"/>
+                <line x1="2" y1="22" x2="2" y2="25"/>
+                <line x1="30" y1="22" x2="30" y2="25"/>
+                <line x1="2" y1="18" x2="30" y2="18"/>
               </svg>
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1a1a2e" strokeWidth="1.5">
-                <path d="M4 21V8l8-5 8 5v13"/>
-                <rect x="9" y="14" width="6" height="7"/>
-                <path d="M9 10h6"/>
+              {/* Chair */}
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#1a1a2e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M8 2V10"/>
+                <path d="M20 2V10"/>
+                <path d="M6 10h16a1 1 0 011 1v4a1 1 0 01-1 1H6a1 1 0 01-1-1v-4a1 1 0 011-1z"/>
+                <path d="M7 16v9M21 16v9"/>
+                <path d="M10 16v4h8v-4"/>
               </svg>
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1a1a2e" strokeWidth="1.5">
-                <rect x="2" y="12" width="20" height="9" rx="1"/>
-                <path d="M6 12V9a2 2 0 012-2h8a2 2 0 012 2v3"/>
-                <line x1="2" y1="16" x2="22" y2="16"/>
+              {/* Dining Table */}
+              <svg width="30" height="28" viewBox="0 0 30 28" fill="none" stroke="#1a1a2e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="4" y="10" width="22" height="3" rx="1"/>
+                <line x1="7" y1="13" x2="6" y2="25"/>
+                <line x1="23" y1="13" x2="24" y2="25"/>
+                <line x1="15" y1="13" x2="15" y2="25"/>
               </svg>
             </div>
 
