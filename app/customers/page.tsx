@@ -161,7 +161,7 @@ export default function CustomersPage() {
       toast('No data to export', 'error')
       return
     }
-    exportToCSV(filtered, 'customers')
+    exportToCSV(filtered as unknown as Record<string, unknown>[], 'customers')
     toast('CSV exported', 'success')
   }
 
@@ -288,7 +288,7 @@ export default function CustomersPage() {
 
         {filtered.length > ROWS_PER_PAGE && (
           <div className="mt-4">
-            <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+            <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
           </div>
         )}
       </div>

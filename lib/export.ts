@@ -1,10 +1,10 @@
-export function exportToCSV<T extends Record<string, unknown>>(data: T[], filename: string, headers?: Record<keyof T, string>) {
+export function exportToCSV(data: Record<string, unknown>[], filename: string, headers?: Record<string, string>) {
   if (!data.length) return
 
-  const keys = Object.keys(data[0]) as (keyof T)[]
+  const keys = Object.keys(data[0])
   const headerRow = headers
-    ? keys.map((k) => headers[k] || String(k))
-    : keys.map(String)
+    ? keys.map((k) => headers[k] || k)
+    : keys
 
   const csvRows = [
     headerRow.join(','),

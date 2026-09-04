@@ -260,7 +260,7 @@ export default function OrdersPage() {
         </table>
         {!loading && filtered.length > ROWS_PER_PAGE && (
           <div className="mt-4">
-            <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+            <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
           </div>
         )}
       </div>

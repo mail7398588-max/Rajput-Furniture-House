@@ -107,7 +107,7 @@ export default function Home() {
         const categoryMap: Record<string, number> = {}
         for (const tx of transactions) {
           const cat = tx.category || 'Uncategorized'
-          categoryMap[cat] = (categoryMap[cat] || 0) + Number(tx.expense) || 0
+          categoryMap[cat] = (categoryMap[cat] || 0) + (Number(tx.expense) || 0)
         }
 
         const expenseCategories = Object.entries(categoryMap)
