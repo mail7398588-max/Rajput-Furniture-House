@@ -37,23 +37,17 @@
     @apply px-4 py-3.5 text-sm text-left text-warm-800;
   }
 
-  .table-wrapper {
-    @apply relative overflow-hidden;
-  }
-
-  .table-wrapper table thead th {
-    @apply sticky top-0 z-10 bg-warm-50;
-  }
-
   .table-scroll-container {
     @apply overflow-x-auto;
-    scrollbar-width: thin;
-    scrollbar-color: #E2C27D transparent;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .table-scroll-container table thead th {
+    @apply bg-warm-50;
   }
 
   .table-scroll-container::-webkit-scrollbar {
     height: 8px;
-    width: 6px;
   }
 
   .table-scroll-container::-webkit-scrollbar-track {
