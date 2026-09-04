@@ -83,6 +83,10 @@ export default function CashMemoPage() {
     if (customer) {
       setSelectedOrder(customer)
       setAdvanceReceived(customer.advance || 0)
+
+      const detail = [customer.item, customer.details].filter(Boolean).join(' - ') || ''
+      const rate = customer.order_amount || 0
+      setItems([{ sno: 1, detail, rate, qty: 1, amount: rate }])
     }
   }
 
