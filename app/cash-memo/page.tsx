@@ -216,7 +216,33 @@ export default function CashMemoPage() {
 
       {/* Print Layout */}
       <div className="print-only">
-        <div style={{ maxWidth: '500px', margin: '0 auto', padding: '20px', fontFamily: 'Arial, sans-serif' }}>
+        <div style={{ maxWidth: '500px', margin: '0 auto', padding: '20px', fontFamily: 'Arial, sans-serif', position: 'relative', overflow: 'hidden' }}>
+
+          {/* Watermark */}
+          <div style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%) rotate(-35deg)',
+            textAlign: 'center',
+            opacity: 0.06,
+            pointerEvents: 'none',
+            zIndex: 0,
+            whiteSpace: 'nowrap',
+          }}>
+            <div style={{ fontSize: '42px', fontWeight: 'bold', letterSpacing: '2px', lineHeight: '1.2', color: '#000' }}>
+              RAJPUT FURNITURE
+            </div>
+            <div style={{ fontSize: '16px', fontWeight: '600', marginTop: '6px', color: '#000' }}>
+              Muhammad Abbas: 0300-8583823
+            </div>
+            <div style={{ fontSize: '16px', fontWeight: '600', marginTop: '2px', color: '#000' }}>
+              Junaid Abbas: 0318-6497054
+            </div>
+          </div>
+
+          {/* Content */}
+          <div style={{ position: 'relative', zIndex: 1 }}>
           <div style={{ textAlign: 'center', borderBottom: '2px solid black', paddingBottom: '12px', marginBottom: '12px' }}>
             <h1 style={{ fontSize: '22px', fontWeight: 'bold', margin: 0 }}>RAJPOOT FURNITURE</h1>
             <p style={{ fontSize: '12px', marginTop: '4px' }}>
@@ -291,6 +317,7 @@ export default function CashMemoPage() {
             <div style={{ borderTop: '1px solid #333', width: '40%', textAlign: 'center', paddingTop: '4px', fontSize: '11px' }}>
               Authorized Signature
             </div>
+          </div>
           </div>
         </div>
       </div>
