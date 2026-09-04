@@ -206,8 +206,8 @@ export default function IncomeExpensePage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Daily Income & Expense</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1 className="page-title">Daily Income & Expense</h1>
+          <p className="page-subtitle">
             Track daily income and expenditure - automatic balance calculation
           </p>
         </div>

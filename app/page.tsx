@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { DollarSign, Users, ShoppingCart, TrendingUp } from 'lucide-react'
+import { DollarSign, ShoppingCart, TrendingUp, Wallet } from 'lucide-react'
 import StatCard from '@/components/StatCard'
 import { MonthlyRevenueChart, ExpensePieChart } from '@/components/Charts'
 import { supabase } from '@/lib/supabase'
@@ -44,7 +44,6 @@ export default function Home() {
     async function fetchDashboard() {
       try {
         const last6 = getLast6Months()
-        const startMonth = last6[0]
 
         const [ordersRes, transactionsRes] = await Promise.all([
           db()
@@ -94,7 +93,7 @@ export default function Home() {
         }
 
         const monthlyData = last6.map((m) => {
-          const [year, month] = m.split('-')
+          const [, month] = m.split('-')
           const entry = monthlyMap[m]
           return {
             month: MONTH_NAMES[parseInt(month) - 1],
@@ -135,7 +134,10 @@ export default function Home() {
   if (loading) {
     return (
       <div className="p-8 flex items-center justify-center min-h-[400px]">
-        <p className="text-gray-500 text-lg">Loading...</p>
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-primary-200 border-t-primary-500 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-warm-500 font-medium">Loading dashboard...</p>
+        </div>
       </div>
     )
   }
@@ -143,7 +145,10 @@ export default function Home() {
   if (error) {
     return (
       <div className="p-8 flex items-center justify-center min-h-[400px]">
-        <p className="text-red-500 text-lg">Error: {error}</p>
+        <div className="text-center bg-red-50 rounded-2xl p-8 border border-red-100">
+          <p className="text-red-600 font-semibold text-lg">Error loading dashboard</p>
+          <p className="text-red-400 text-sm mt-2">{error}</p>
+        </div>
       </div>
     )
   }
@@ -153,11 +158,18 @@ export default function Home() {
   return (
     <div className="p-8">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-sm text-gray-500 mt-1">Overview of your furniture workshop</p>
+        <div className="flex items-center gap-3 mb-1">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
+            <Wallet size={20} className="text-white" />
+          </div>
+          <div>
+            <h1 className="page-title">Dashboard</h1>
+            <p className="page-subtitle">Overview of your furniture workshop</p>
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
         <StatCard
           title="Total Revenue"
           value={formatPKR(stats.totalRevenue)}
@@ -175,20 +187,20 @@ export default function Home() {
         <StatCard
           title="Net Profit"
           value={formatPKR(stats.netProfit)}
-          icon={<DollarSign size={20} />}
-          color="blue"
+          icon={<Wallet size={20} />}
+          color="amber"
           subtitle="All time"
         />
         <StatCard
           title="Active Orders"
           value={String(stats.activeOrders)}
           icon={<ShoppingCart size={20} />}
-          color="purple"
+          color="blue"
           subtitle="In progress"
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <MonthlyRevenueChart data={stats.monthlyData} />
         <ExpensePieChart data={stats.expenseCategories} />
       </div>

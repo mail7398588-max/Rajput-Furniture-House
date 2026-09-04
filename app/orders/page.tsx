@@ -144,8 +144,8 @@ export default function OrdersPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Orders P&L</h1>
-          <p className="text-sm text-gray-500 mt-1">{orders.length} orders tracked</p>
+          <h1 className="page-title">Orders P&L</h1>
+          <p className="page-subtitle">{orders.length} orders tracked</p>
         </div>
         <div className="flex gap-2">
           <button onClick={handleExport} className="btn-secondary flex items-center gap-2">

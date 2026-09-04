@@ -15,10 +15,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
+      <body className="bg-warm-50">
         <ToastProvider>
           <Sidebar />
-          <main className="lg:ml-64 min-h-screen bg-gray-50 pt-14 lg:pt-0">
+          <main className="lg:ml-72 min-h-screen pt-14 lg:pt-0">
             {children}
           </main>
         </ToastProvider>

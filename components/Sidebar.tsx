@@ -12,6 +12,7 @@ import {
   Receipt,
   Menu,
   X,
+  Sofa,
 } from 'lucide-react'
 
 const navItems = [
@@ -31,30 +32,37 @@ export default function Sidebar() {
     <>
       <button
         onClick={() => setMobileOpen(!mobileOpen)}
-        className="lg:hidden fixed top-4 left-4 z-[60] bg-slate-900 text-white p-2 rounded-lg shadow-lg"
+        className="lg:hidden fixed top-4 left-4 z-[60] bg-sidebar text-white p-2.5 rounded-xl shadow-lg hover:bg-sidebar-light transition-colors"
       >
         {mobileOpen ? <X size={20} /> : <Menu size={20} />}
       </button>
 
       {mobileOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/50 z-40"
+          className="lg:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
           onClick={() => setMobileOpen(false)}
         />
       )}
 
       <aside
-        className={`fixed left-0 top-0 h-full w-64 bg-slate-900 text-white z-50 transform transition-transform duration-200 ease-in-out ${
+        className={`fixed left-0 top-0 h-full w-72 bg-gradient-to-b from-sidebar via-sidebar to-[#12122a] text-white z-50 transform transition-transform duration-300 ease-in-out ${
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
         } lg:translate-x-0`}
       >
-        <div className="p-6 border-b border-slate-700">
-          <h1 className="text-lg font-bold text-white leading-tight">
-            RAJPOOT FURNITURE
-          </h1>
-          <p className="text-xs text-slate-400 mt-1">Workshop Dashboard</p>
+        <div className="p-6 border-b border-white/10">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center shadow-lg">
+              <Sofa size={20} className="text-white" />
+            </div>
+            <div>
+              <h1 className="text-lg font-bold text-white leading-tight tracking-tight">
+                RAJPOOT FURNITURE
+              </h1>
+              <p className="text-[11px] text-primary-400 font-medium mt-0.5">Workshop Dashboard</p>
+            </div>
+          </div>
         </div>
-        <nav className="mt-4 px-3">
+        <nav className="mt-6 px-4">
           {navItems.map((item) => {
             const isActive = pathname === item.href
             const Icon = item.icon
@@ -63,23 +71,23 @@ export default function Sidebar() {
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 text-sm font-medium transition-colors ${
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl mb-1.5 text-sm font-medium transition-all duration-200 ${
                   isActive
-                    ? 'bg-blue-600 text-white'
-                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                    ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/25'
+                    : 'text-slate-400 hover:bg-white/5 hover:text-white hover:translate-x-1'
                 }`}
               >
-                <Icon size={18} />
+                <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />
                 {item.label}
               </Link>
             )
           })}
         </nav>
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700">
-          <p className="text-xs text-slate-500 text-center">
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/10 bg-black/20">
+          <p className="text-[11px] text-slate-400 text-center">
             Muhammad Abbas: 0300-8583823
           </p>
-          <p className="text-xs text-slate-500 text-center">
+          <p className="text-[11px] text-slate-400 text-center mt-0.5">
             Junaid Abbas: 0318-6497054
           </p>
         </div>

@@ -314,8 +314,8 @@ export default function AttendancePage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Attendance & Salary</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1 className="page-title">Attendance & Salary</h1>
+          <p className="page-subtitle">
             P = Present | A = Absent | H = Half Day - Click to toggle
           </p>
         </div>

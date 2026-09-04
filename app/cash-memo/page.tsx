@@ -173,8 +173,8 @@ export default function CashMemoPage() {
     <div>
       <div className="flex items-center justify-between mb-6 no-print">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Cash Memo Generator</h1>
-          <p className="text-sm text-gray-500 mt-1">Generate printable receipts for customers</p>
+          <h1 className="page-title">Cash Memo Generator</h1>
+          <p className="page-subtitle">Generate printable receipts for customers</p>
         </div>
         <div className="flex items-center gap-2">
           <button

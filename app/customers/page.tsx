@@ -169,8 +169,8 @@ export default function CustomersPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Customer Register</h1>
-          <p className="text-sm text-gray-500 mt-1">{customers.length} total customers</p>
+          <h1 className="page-title">Customer Register</h1>
+          <p className="page-subtitle">{customers.length} total customers</p>
         </div>
         <div className="flex gap-2">
           <button onClick={handleExport} className="btn-secondary flex items-center gap-2">
