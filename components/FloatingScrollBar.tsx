@@ -32,26 +32,29 @@ export default function FloatingScrollBar({ containerRef }: { containerRef: Reac
     const scrollbar = scrollRef.current
     if (!container || !scrollbar) return
 
+    const containerEl = container
+    const scrollbarEl = scrollbar
+
     function syncFromContainer() {
-      if (syncing.current || !scrollbar) return
+      if (syncing.current) return
       syncing.current = true
-      scrollbar.scrollLeft = container!.scrollLeft
+      scrollbarEl.scrollLeft = containerEl.scrollLeft
       syncing.current = false
     }
 
     function syncFromScrollbar() {
-      if (syncing.current || !container) return
+      if (syncing.current) return
       syncing.current = true
-      container.scrollLeft = scrollbar!.scrollLeft
+      containerEl.scrollLeft = scrollbarEl.scrollLeft
       syncing.current = false
     }
 
-    container.addEventListener('scroll', syncFromContainer, { passive: true })
-    scrollbar.addEventListener('scroll', syncFromScrollbar, { passive: true })
+    containerEl.addEventListener('scroll', syncFromContainer, { passive: true })
+    scrollbarEl.addEventListener('scroll', syncFromScrollbar, { passive: true })
 
     return () => {
-      container.removeEventListener('scroll', syncFromContainer)
-      scrollbar.removeEventListener('scroll', syncFromScrollbar)
+      containerEl.removeEventListener('scroll', syncFromContainer)
+      scrollbarEl.removeEventListener('scroll', syncFromScrollbar)
     }
   }, [containerRef])
 
