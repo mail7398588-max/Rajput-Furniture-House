@@ -190,23 +190,24 @@ export default function OrdersPage() {
         </div>
       </div>
 
-      <div className="stat-card overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="table-header">
-              <th className="table-cell">Order No</th>
-              <th className="table-cell">Customer</th>
-              <th className="table-cell">Order Amount</th>
-              <th className="table-cell">Material</th>
-              <th className="table-cell">Labour</th>
-              <th className="table-cell">Transport</th>
-              <th className="table-cell">Other</th>
-              <th className="table-cell">Total Expense</th>
-              <th className="table-cell">Profit/Loss</th>
-              <th className="table-cell">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+      <div className="stat-card p-0">
+        <div className="table-scroll-container max-h-[60vh]">
+          <table className="w-full min-w-[800px]">
+            <thead>
+              <tr className="table-header">
+                <th className="table-cell">Order No</th>
+                <th className="table-cell">Customer</th>
+                <th className="table-cell">Order Amount</th>
+                <th className="table-cell">Material</th>
+                <th className="table-cell">Labour</th>
+                <th className="table-cell">Transport</th>
+                <th className="table-cell">Other</th>
+                <th className="table-cell">Total Expense</th>
+                <th className="table-cell">Profit/Loss</th>
+                <th className="table-cell">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
             {loading ? (
               <tr>
                 <td colSpan={10} className="table-cell text-center text-gray-400 py-8">
@@ -257,9 +258,10 @@ export default function OrdersPage() {
               })
             )}
           </tbody>
-        </table>
+          </table>
+        </div>
         {!loading && filtered.length > ROWS_PER_PAGE && (
-          <div className="mt-4">
+          <div className="px-4 py-3 border-t border-warm-100">
             <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
           </div>
         )}

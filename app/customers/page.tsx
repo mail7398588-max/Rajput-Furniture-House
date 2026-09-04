@@ -200,25 +200,26 @@ export default function CustomersPage() {
         </div>
       </div>
 
-      <div className="stat-card overflow-x-auto">
-        <table className="w-full min-w-[900px]">
-          <thead>
-            <tr className="table-header">
-              <th className="table-cell w-12">S.No</th>
-              <th className="table-cell w-20">Order</th>
-              <th className="table-cell w-24">Date</th>
-              <th className="table-cell">Customer</th>
-              <th className="table-cell w-28">Phone</th>
-              <th className="table-cell w-32">Items</th>
-              <th className="table-cell text-right">Amount</th>
-              <th className="table-cell text-right">Advance</th>
-              <th className="table-cell text-right">Remaining</th>
-              <th className="table-cell w-24">Delivery</th>
-              <th className="table-cell w-24">Status</th>
-              <th className="table-cell w-24">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+      <div className="stat-card p-0">
+        <div className="table-scroll-container max-h-[60vh]">
+          <table className="w-full min-w-[900px]">
+            <thead>
+              <tr className="table-header">
+                <th className="table-cell w-12">S.No</th>
+                <th className="table-cell w-20">Order</th>
+                <th className="table-cell w-24">Date</th>
+                <th className="table-cell">Customer</th>
+                <th className="table-cell w-28">Phone</th>
+                <th className="table-cell w-32">Items</th>
+                <th className="table-cell text-right">Amount</th>
+                <th className="table-cell text-right">Advance</th>
+                <th className="table-cell text-right">Remaining</th>
+                <th className="table-cell w-24">Delivery</th>
+                <th className="table-cell w-24">Status</th>
+                <th className="table-cell w-24">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
             {loading ? (
               <tr>
                 <td colSpan={12} className="table-cell text-center py-8">
@@ -299,10 +300,11 @@ export default function CustomersPage() {
               ))
             )}
           </tbody>
-        </table>
+          </table>
+        </div>
 
         {filtered.length > ROWS_PER_PAGE && (
-          <div className="mt-4">
+          <div className="px-4 py-3 border-t border-warm-100">
             <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
           </div>
         )}

@@ -276,22 +276,23 @@ export default function IncomeExpensePage() {
         </div>
       </div>
 
-      <div className="stat-card overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="table-header">
-              <th className="table-cell">Date</th>
-              <th className="table-cell">Particulars</th>
-              <th className="table-cell">Category</th>
-              <th className="table-cell">Income (Rs)</th>
-              <th className="table-cell">Expense (Rs)</th>
-              <th className="table-cell">Payment Mode</th>
-              <th className="table-cell">Order No</th>
-              <th className="table-cell">Balance (Rs)</th>
-              <th className="table-cell">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+      <div className="stat-card p-0">
+        <div className="table-scroll-container max-h-[60vh]">
+          <table className="w-full min-w-[800px]">
+            <thead>
+              <tr className="table-header">
+                <th className="table-cell">Date</th>
+                <th className="table-cell">Particulars</th>
+                <th className="table-cell">Category</th>
+                <th className="table-cell">Income (Rs)</th>
+                <th className="table-cell">Expense (Rs)</th>
+                <th className="table-cell">Payment Mode</th>
+                <th className="table-cell">Order No</th>
+                <th className="table-cell">Balance (Rs)</th>
+                <th className="table-cell">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
             {loading ? (
               <tr>
                 <td colSpan={9} className="table-cell text-center text-gray-400 py-8">
@@ -341,8 +342,11 @@ export default function IncomeExpensePage() {
               ))
             )}
           </tbody>
-        </table>
-        <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+          </table>
+        </div>
+        <div className="px-4 py-3 border-t border-warm-100">
+          <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+        </div>
       </div>
 
       <Modal isOpen={modalOpen} onClose={closeModal} title={editingTransaction ? 'Edit Transaction' : 'Add Transaction'}>
