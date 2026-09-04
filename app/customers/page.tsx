@@ -45,7 +45,7 @@ export default function CustomersPage() {
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null)
   const [form, setForm] = useState(emptyCustomer)
   const [page, setPage] = useState(1)
-  const toast = useToast()
+  const { toast } = useToast()
 
   useEffect(() => {
     fetchCustomers()
