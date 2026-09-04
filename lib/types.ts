@@ -62,12 +62,10 @@ export interface Attendance {
   half_days: number
   payable_days: number
   ot_hours: number
-  ot_multiplier: number
   ot_rate: number
   ot_amount: number
   gross_salary: number
   advance: number
-  other_deduction: number
   net_payable: number
   paid_amount: number
   remaining: number

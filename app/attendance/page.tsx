@@ -28,17 +28,15 @@ function computeSalary(record: {
   present_days: number
   half_days: number
   total_ot_hours: number
-  ot_multiplier: number
   advance: number
-  other_deduction: number
   paid_amount: number
 }) {
   const dailyRate = record.monthly_salary / (record.working_days || 26)
   const payableDays = record.present_days + record.half_days * 0.5
-  const otRate = dailyRate / 8 * record.ot_multiplier
+  const otRate = dailyRate / 8 * 1.5
   const otAmount = record.total_ot_hours * otRate
   const grossSalary = dailyRate * payableDays + otAmount
-  const netPayable = grossSalary - record.advance - record.other_deduction
+  const netPayable = grossSalary - record.advance
   const remaining = netPayable - record.paid_amount
   return { dailyRate, payableDays, otRate, otAmount, grossSalary, netPayable, remaining }
 }
@@ -58,12 +56,10 @@ export default function AttendancePage() {
   const [editingWorker, setEditingWorker] = useState<Attendance | null>(null)
   const [editForm, setEditForm] = useState({ worker_name: '', designation: '', monthly_salary: 0 })
   const [savingEdit, setSavingEdit] = useState(false)
-  const [form, setForm] = useState({ worker_name: '', designation: '', monthly_salary: 0, ot_multiplier: 1.5 })
+  const [form, setForm] = useState({ worker_name: '', designation: '', monthly_salary: 0 })
   const [pendingEdits, setPendingEdits] = useState<Record<string, {
     ot_data: Record<string, number>
-    ot_multiplier: number
     advance: number
-    other_deduction: number
     paid_amount: number
   }>>({})
 
@@ -104,7 +100,7 @@ export default function AttendancePage() {
       }])
       if (error) throw error
       setModalOpen(false)
-      setForm({ worker_name: '', designation: '', monthly_salary: 0, ot_multiplier: 1.5 })
+      setForm({ worker_name: '', designation: '', monthly_salary: 0 })
       toast('Worker added', 'success')
       fetchRecords()
     } catch {
@@ -162,8 +158,7 @@ export default function AttendancePage() {
     const computed = computeSalary({
       monthly_salary: record.monthly_salary, working_days: workingDays,
       present_days: presentDays, half_days: halfDays,
-      total_ot_hours: totalOT, ot_multiplier: pend.ot_multiplier,
-      advance: pend.advance, other_deduction: pend.other_deduction, paid_amount: pend.paid_amount,
+      total_ot_hours: totalOT, advance: pend.advance, paid_amount: pend.paid_amount,
     })
 
     try {
@@ -182,17 +177,14 @@ export default function AttendancePage() {
 
   function updateOTDay(recordId: string, day: number, hours: number) {
     setPendingEdits((prev) => {
-      const current = prev[recordId]
       const record = records.find((r) => r.id === recordId)
-      const otData = { ...(current?.ot_data || (record?.ot_data as Record<string, number>) || {}), [String(day)]: hours }
+      const otData = { ...(prev[recordId]?.ot_data || (record?.ot_data as Record<string, number>) || {}), [String(day)]: hours }
       return {
         ...prev,
         [recordId]: {
           ot_data: otData,
-          ot_multiplier: current?.ot_multiplier ?? record?.ot_multiplier ?? 1.5,
-          advance: current?.advance ?? record?.advance ?? 0,
-          other_deduction: current?.other_deduction ?? record?.other_deduction ?? 0,
-          paid_amount: current?.paid_amount ?? record?.paid_amount ?? 0,
+          advance: prev[recordId]?.advance ?? record?.advance ?? 0,
+          paid_amount: prev[recordId]?.paid_amount ?? record?.paid_amount ?? 0,
         }
       }
     })
@@ -205,9 +197,7 @@ export default function AttendancePage() {
         ...prev,
         [recordId]: {
           ot_data: prev[recordId]?.ot_data || (record?.ot_data as Record<string, number>) || {},
-          ot_multiplier: prev[recordId]?.ot_multiplier ?? record?.ot_multiplier ?? 1.5,
           advance: prev[recordId]?.advance ?? record?.advance ?? 0,
-          other_deduction: prev[recordId]?.other_deduction ?? record?.other_deduction ?? 0,
           paid_amount: prev[recordId]?.paid_amount ?? record?.paid_amount ?? 0,
           [field]: value,
         }
@@ -218,9 +208,7 @@ export default function AttendancePage() {
   function getPend(record: Attendance) {
     return pendingEdits[record.id] || {
       ot_data: (record.ot_data as Record<string, number>) || {},
-      ot_multiplier: record.ot_multiplier || 1.5,
       advance: record.advance || 0,
-      other_deduction: record.other_deduction || 0,
       paid_amount: record.paid_amount || 0,
     }
   }
@@ -234,15 +222,13 @@ export default function AttendancePage() {
     const computed = computeSalary({
       monthly_salary: record.monthly_salary, working_days: workingDays,
       present_days: presentDays, half_days: halfDays,
-      total_ot_hours: totalOT, ot_multiplier: pend.ot_multiplier,
-      advance: pend.advance, other_deduction: pend.other_deduction, paid_amount: pend.paid_amount,
+      total_ot_hours: totalOT, advance: pend.advance, paid_amount: pend.paid_amount,
     })
 
     try {
       setSavingId(record.id)
       const { error } = await db().from('attendance').update({
-        ot_data: pend.ot_data, ot_multiplier: pend.ot_multiplier,
-        advance: pend.advance, other_deduction: pend.other_deduction, paid_amount: pend.paid_amount,
+        ot_data: pend.ot_data, advance: pend.advance, paid_amount: pend.paid_amount,
         daily_rate: computed.dailyRate, payable_days: computed.payableDays,
         ot_rate: computed.otRate, ot_amount: computed.otAmount, gross_salary: computed.grossSalary,
         net_payable: computed.netPayable, remaining: computed.remaining,
@@ -269,7 +255,7 @@ export default function AttendancePage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="page-title">Attendance & Salary</h1>
-          <p className="page-subtitle">P = Present | A = Absent | H = Half Day — Click to toggle. Enter OT hours per day below the grid.</p>
+          <p className="page-subtitle">P = Present | A = Absent | H = Half Day — Click to toggle. Enter OT hours per day below.</p>
         </div>
         <button onClick={() => setModalOpen(true)} className="btn-primary flex items-center gap-2">
           <Plus size={16} /> Add Worker
@@ -316,7 +302,6 @@ export default function AttendancePage() {
               const totalOT = Object.values(pend.ot_data).reduce((s, v) => s + (v || 0), 0)
               return (
                 <div key={r.id} className="border border-warm-200 rounded-xl p-4 bg-white">
-                  {/* Header */}
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 text-white flex items-center justify-center font-bold text-sm">{getInitials(r.worker_name)}</div>
@@ -337,7 +322,6 @@ export default function AttendancePage() {
                     </div>
                   </div>
 
-                  {/* Attendance Grid */}
                   <div className="flex flex-wrap gap-1 mb-2">
                     {days.map((day) => {
                       const status = r.attendance_data?.[String(day)] || ''
@@ -351,34 +335,20 @@ export default function AttendancePage() {
                     })}
                   </div>
 
-                  {/* OT Grid - hours per day */}
                   <div className="mb-2">
                     <p className="text-[10px] text-warm-500 uppercase font-semibold mb-1">OT Hours per Day</p>
                     <div className="flex flex-wrap gap-1">
-                      {days.map((day) => {
-                        const otVal = pend.ot_data?.[String(day)] || 0
-                        return (
-                          <div key={day} className="relative">
-                            <input
-                              type="number" min={0} max={24} step={0.5}
-                              className="w-8 h-7 text-[10px] text-center border border-warm-200 rounded bg-warm-50 focus:ring-1 focus:ring-primary-400 focus:outline-none"
-                              value={otVal || ''}
-                              onChange={(e) => updateOTDay(r.id, day, Number(e.target.value))}
-                              placeholder="0"
-                              title={`Day ${day} OT`}
-                            />
-                          </div>
-                        )
-                      })}
+                      {days.map((day) => (
+                        <input key={day} type="number" min={0} max={24} step={0.5}
+                          className="w-8 h-7 text-[10px] text-center border border-warm-200 rounded bg-warm-50 focus:ring-1 focus:ring-primary-400 focus:outline-none"
+                          value={pend.ot_data?.[String(day)] || ''}
+                          onChange={(e) => updateOTDay(r.id, day, Number(e.target.value))}
+                          placeholder="0" title={`Day ${day} OT`} />
+                      ))}
                     </div>
                   </div>
 
-                  {/* Financial Row */}
                   <div className="flex flex-wrap items-end gap-3 pt-3 border-t border-warm-100">
-                    <div>
-                      <label className="text-[10px] text-warm-500 uppercase font-semibold">OT Multiplier</label>
-                      <input type="number" className="input-field w-16 text-sm py-1" value={pend.ot_multiplier} onChange={(e) => updatePendField(r.id, 'ot_multiplier', Number(e.target.value))} min={0} step={0.5} />
-                    </div>
                     <div>
                       <label className="text-[10px] text-warm-500 uppercase font-semibold">Total OT Hrs</label>
                       <div className="input-field w-16 text-sm py-1 bg-warm-100 font-bold text-blue-600">{totalOT}</div>
@@ -386,10 +356,6 @@ export default function AttendancePage() {
                     <div>
                       <label className="text-[10px] text-warm-500 uppercase font-semibold">Advance (Rs)</label>
                       <input type="number" className="input-field w-24 text-sm py-1" value={pend.advance} onChange={(e) => updatePendField(r.id, 'advance', Number(e.target.value))} min={0} />
-                    </div>
-                    <div>
-                      <label className="text-[10px] text-warm-500 uppercase font-semibold">Other Deduction (Rs)</label>
-                      <input type="number" className="input-field w-24 text-sm py-1" value={pend.other_deduction} onChange={(e) => updatePendField(r.id, 'other_deduction', Number(e.target.value))} min={0} />
                     </div>
                     <div>
                       <label className="text-[10px] text-warm-500 uppercase font-semibold">Paid (Rs)</label>
@@ -410,8 +376,7 @@ export default function AttendancePage() {
         <div className="space-y-4">
           <div><label className="label-text">Worker Name *</label><input type="text" className="input-field" value={form.worker_name} onChange={(e) => setForm({ ...form, worker_name: e.target.value })} placeholder="e.g., Ahmed, Bilal" /></div>
           <div><label className="label-text">Designation</label><input type="text" className="input-field" value={form.designation} onChange={(e) => setForm({ ...form, designation: e.target.value })} placeholder="e.g., Carpenter, Helper" /></div>
-          <div><label className="label-text">Monthly Salary (Rs)</label><input type="number" className="input-field" value={form.monthly_salary} onChange={(e) => setForm({ ...form, monthly_salary: Number(e.target.value) })} /><p className="text-xs text-warm-400 mt-1">Daily: Rs. {(form.monthly_salary / workingDays || 0).toFixed(0)}/day</p></div>
-          <div><label className="label-text">OT Multiplier</label><input type="number" className="input-field" value={form.ot_multiplier} onChange={(e) => setForm({ ...form, ot_multiplier: Number(e.target.value) })} min={0} step={0.5} /><p className="text-xs text-warm-400 mt-1">1.5 = time-and-a-half, 2 = double time</p></div>
+          <div><label className="label-text">Monthly Salary (Rs)</label><input type="number" className="input-field" value={form.monthly_salary} onChange={(e) => setForm({ ...form, monthly_salary: Number(e.target.value) })} /><p className="text-xs text-warm-400 mt-1">Daily: Rs. {(form.monthly_salary / workingDays || 0).toFixed(0)}/day | OT rate (1.5x): Rs. {((form.monthly_salary / workingDays || 0) / 8 * 1.5).toFixed(0)}/hr</p></div>
         </div>
         <div className="flex justify-end gap-3 mt-6">
           <button onClick={() => setModalOpen(false)} className="btn-secondary">Cancel</button>
