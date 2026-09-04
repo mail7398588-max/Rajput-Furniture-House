@@ -310,16 +310,16 @@ export default function CashMemoPage() {
             Thank you for your business!
           </div>
 
-          <div style={{ marginTop: '40px', display: 'flex', justifyContent: 'space-between', paddingTop: '8px' }}>
-            <div style={{ borderTop: '1px solid #333', width: '40%', textAlign: 'center', paddingTop: '4px', fontSize: '11px' }}>
-              Customer Signature
+          <div style={{ marginTop: '30px', textAlign: 'center' }}>
+            <div style={{ fontSize: '18px', fontWeight: 'bold', opacity: 0.12, letterSpacing: '1px', lineHeight: '1.3' }}>
+              RAJPUT FURNITURE HOUSE
             </div>
-            <div style={{ borderTop: '1px solid #333', width: '40%', textAlign: 'center', paddingTop: '4px', fontSize: '11px' }}>
-              Authorized Signature
+            <div style={{ fontSize: '10px', opacity: 0.10, marginTop: '4px' }}>
+              Muhammad Abbas: 0300-8583823 | Junaid Abbas: 0318-6497054
             </div>
-          </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   )
