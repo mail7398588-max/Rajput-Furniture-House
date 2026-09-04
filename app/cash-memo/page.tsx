@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 const db = () => supabase()
 import type { Customer, CashMemoItem } from '@/lib/types'
-import { Printer } from 'lucide-react'
+import { Printer, Download } from 'lucide-react'
 import { useToast } from '@/components/Toast'
 
 export default function CashMemoPage() {
@@ -63,9 +63,32 @@ export default function CashMemoPage() {
 
   const total = items.reduce((sum, item) => sum + item.amount, 0)
   const remaining = total - advanceReceived
+  const printRef = useRef<HTMLDivElement>(null)
 
   function handlePrint() {
     window.print()
+  }
+
+  async function handleDownloadPDF() {
+    if (!printRef.current) return
+    try {
+      const html2canvas = (await import('html2canvas')).default
+      const jsPDF = (await import('jspdf')).default
+
+      const canvas = await html2canvas(printRef.current, { scale: 2, useCORS: true })
+      const imgData = canvas.toDataURL('image/png')
+      const pdf = new jsPDF('p', 'mm', 'a4')
+      const pdfWidth = pdf.internal.pageSize.getWidth()
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
+
+      const customerName = selectedOrder?.customer_name || 'Customer'
+      const fileName = `${customerName.replace(/\s+/g, '_')}_${memoNo}.pdf`
+      pdf.save(fileName)
+      toast('PDF downloaded', 'success')
+    } catch {
+      toast('Failed to generate PDF', 'error')
+    }
   }
 
   return (
@@ -75,9 +98,14 @@ export default function CashMemoPage() {
           <h1 className="page-title">Cash Memo Generator</h1>
           <p className="page-subtitle">Generate printable receipts for customers</p>
         </div>
-        <button onClick={handlePrint} className="btn-primary flex items-center gap-2">
-          <Printer size={16} /> Print Memo
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={handleDownloadPDF} className="btn-secondary flex items-center gap-2">
+            <Download size={16} /> Download PDF
+          </button>
+          <button onClick={handlePrint} className="btn-primary flex items-center gap-2">
+            <Printer size={16} /> Print Memo
+          </button>
+        </div>
       </div>
 
       {/* Form */}
@@ -215,7 +243,7 @@ export default function CashMemoPage() {
       </div>
 
       {/* Print Layout */}
-      <div className="print-only">
+      <div className="print-only" ref={printRef}>
         <div style={{ maxWidth: '520px', margin: '0 auto', padding: '0', fontFamily: "'Segoe UI', Arial, sans-serif", color: '#1a1a1a', background: '#fff' }}>
 
           {/* Header with decorative border */}
