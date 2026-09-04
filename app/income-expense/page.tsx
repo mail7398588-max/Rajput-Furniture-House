@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 const db = () => supabase()
 import type { Transaction } from '@/lib/types'
@@ -8,6 +8,7 @@ import Modal from '@/components/Modal'
 import { Plus, Search, Trash2, Edit } from 'lucide-react'
 import { useToast } from '@/components/Toast'
 import Pagination from '@/components/Pagination'
+import FloatingScrollBar from '@/components/FloatingScrollBar'
 import { exportToCSV } from '@/lib/export'
 
 const categories = [
@@ -48,6 +49,7 @@ export default function IncomeExpensePage() {
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
   const [saving, setSaving] = useState(false)
   const [page, setPage] = useState(1)
+  const tableRef = useRef<HTMLDivElement>(null)
   const [form, setForm] = useState(defaultForm)
 
   useEffect(() => {
@@ -277,7 +279,7 @@ export default function IncomeExpensePage() {
       </div>
 
       <div className="stat-card p-0">
-        <div className="table-scroll-container">
+        <div className="table-scroll-container" ref={tableRef}>
           <table className="w-full min-w-[800px]">
             <thead>
               <tr className="table-header">
@@ -445,6 +447,7 @@ export default function IncomeExpensePage() {
           </button>
         </div>
       </Modal>
+      <FloatingScrollBar containerRef={tableRef} />
     </div>
   )
 }

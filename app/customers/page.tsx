@@ -1,11 +1,12 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 const db = () => supabase()
 import type { Customer } from '@/lib/types'
 import Modal from '@/components/Modal'
 import Pagination from '@/components/Pagination'
+import FloatingScrollBar from '@/components/FloatingScrollBar'
 import { useToast } from '@/components/Toast'
 import { exportToCSV } from '@/lib/export'
 import { Plus, Search, Edit, Trash2, Download, Eye, X } from 'lucide-react'
@@ -45,6 +46,7 @@ export default function CustomersPage() {
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null)
   const [form, setForm] = useState(emptyCustomer)
   const [page, setPage] = useState(1)
+  const tableRef = useRef<HTMLDivElement>(null)
   const { toast } = useToast()
   const [viewItemsCustomer, setViewItemsCustomer] = useState<Customer | null>(null)
 
@@ -201,7 +203,7 @@ export default function CustomersPage() {
       </div>
 
       <div className="stat-card p-0">
-        <div className="table-scroll-container">
+        <div className="table-scroll-container" ref={tableRef}>
           <table className="w-full min-w-[900px]">
             <thead>
               <tr className="table-header">
@@ -474,6 +476,7 @@ export default function CustomersPage() {
           </button>
         </div>
       </Modal>
+      <FloatingScrollBar containerRef={tableRef} />
     </div>
   )
 }

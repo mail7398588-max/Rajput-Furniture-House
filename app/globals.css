@@ -64,6 +64,28 @@
     background-color: #C9A55C;
   }
 
+  .floating-scrollbar-wrapper {
+    @apply fixed bottom-0 left-0 right-0 z-50 px-4 pb-2 pointer-events-none;
+  }
+
+  .floating-scrollbar-track {
+    @apply w-full h-3 rounded-full overflow-x-auto overflow-y-hidden pointer-events-auto;
+    background: rgba(250, 240, 220, 0.9);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(201, 165, 92, 0.3);
+    scrollbar-width: none;
+  }
+
+  .floating-scrollbar-track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .floating-scrollbar-thumb {
+    @apply h-full rounded-full;
+    background: linear-gradient(90deg, #C9A55C, #FFC726, #C9A55C);
+    min-width: 40px;
+  }
+
   .status-badge {
     @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold;
   }

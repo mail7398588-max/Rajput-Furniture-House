@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 const db = () => supabase()
 import type { Attendance } from '@/lib/types'
 import Modal from '@/components/Modal'
+import FloatingScrollBar from '@/components/FloatingScrollBar'
 import { Plus, Trash2, Edit } from 'lucide-react'
 import { useToast } from '@/components/Toast'
 
@@ -44,6 +45,7 @@ function computeSalary(record: {
 export default function AttendancePage() {
   const { toast } = useToast()
   const [records, setRecords] = useState<Attendance[]>([])
+  const tableRef = useRef<HTMLDivElement>(null)
   const [loading, setLoading] = useState(true)
   const [selectedMonth, setSelectedMonth] = useState(monthNames[new Date().getMonth()])
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
@@ -310,7 +312,7 @@ export default function AttendancePage() {
       </div>
 
       <div className="stat-card p-0">
-        <div className="table-scroll-container">
+        <div className="table-scroll-container" ref={tableRef}>
           {loading ? (
             <div className="text-center py-8"><div className="w-8 h-8 border-3 border-primary-200 border-t-primary-500 rounded-full animate-spin mx-auto mb-2" /><p className="text-warm-400 text-sm">Loading...</p></div>
           ) : records.length === 0 ? (
@@ -419,6 +421,7 @@ export default function AttendancePage() {
           <button onClick={handleEditSave} className="btn-primary" disabled={savingEdit}>{savingEdit ? 'Saving...' : 'Save'}</button>
         </div>
       </Modal>
+      <FloatingScrollBar containerRef={tableRef} />
     </div>
   )
 }
