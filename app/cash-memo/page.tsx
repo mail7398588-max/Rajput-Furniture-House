@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 const db = () => supabase()
 import type { Customer, CashMemoItem } from '@/lib/types'
-import { Printer, Download } from 'lucide-react'
+import { Printer } from 'lucide-react'
 import { useToast } from '@/components/Toast'
 
 export default function CashMemoPage() {
@@ -18,6 +18,7 @@ export default function CashMemoPage() {
   ])
   const [advanceReceived, setAdvanceReceived] = useState(0)
   const [loadingCustomers, setLoadingCustomers] = useState(true)
+  const printRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     fetchCustomers()
@@ -63,33 +64,6 @@ export default function CashMemoPage() {
 
   const total = items.reduce((sum, item) => sum + item.amount, 0)
   const remaining = total - advanceReceived
-  const printRef = useRef<HTMLDivElement>(null)
-
-  function handlePrint() {
-    window.print()
-  }
-
-  async function handleDownloadPDF() {
-    if (!printRef.current) return
-    try {
-      const html2canvas = (await import('html2canvas')).default
-      const jsPDF = (await import('jspdf')).default
-
-      const canvas = await html2canvas(printRef.current, { scale: 2, useCORS: true })
-      const imgData = canvas.toDataURL('image/png')
-      const pdf = new jsPDF('p', 'mm', 'a4')
-      const pdfWidth = pdf.internal.pageSize.getWidth()
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
-
-      const customerName = selectedOrder?.customer_name || 'Customer'
-      const fileName = `${customerName.replace(/\s+/g, '_')}_${memoNo}.pdf`
-      pdf.save(fileName)
-      toast('PDF downloaded', 'success')
-    } catch {
-      toast('Failed to generate PDF', 'error')
-    }
-  }
 
   return (
     <div>
@@ -98,14 +72,9 @@ export default function CashMemoPage() {
           <h1 className="page-title">Cash Memo Generator</h1>
           <p className="page-subtitle">Generate printable receipts for customers</p>
         </div>
-        <div className="flex items-center gap-2">
-          <button onClick={handleDownloadPDF} className="btn-secondary flex items-center gap-2">
-            <Download size={16} /> Download PDF
-          </button>
-          <button onClick={handlePrint} className="btn-primary flex items-center gap-2">
-            <Printer size={16} /> Print Memo
-          </button>
-        </div>
+        <button onClick={() => window.print()} className="btn-primary flex items-center gap-2">
+          <Printer size={16} /> Print Memo
+        </button>
       </div>
 
       {/* Form */}
@@ -116,48 +85,26 @@ export default function CashMemoPage() {
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="label-text">Memo No</label>
-                <input
-                  type="text"
-                  className="input-field"
-                  value={memoNo}
-                  onChange={(e) => setMemoNo(e.target.value)}
-                />
+                <input type="text" className="input-field" value={memoNo} onChange={(e) => setMemoNo(e.target.value)} />
               </div>
               <div>
                 <label className="label-text">Date</label>
-                <input
-                  type="date"
-                  className="input-field"
-                  value={memoDate}
-                  onChange={(e) => setMemoDate(e.target.value)}
-                />
+                <input type="date" className="input-field" value={memoDate} onChange={(e) => setMemoDate(e.target.value)} />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="label-text">Select Order No</label>
-                <select
-                  className="input-field"
-                  onChange={(e) => handleOrderSelect(e.target.value)}
-                  value={selectedOrder?.order_no || ''}
-                  disabled={loadingCustomers}
-                >
+                <select className="input-field" onChange={(e) => handleOrderSelect(e.target.value)} value={selectedOrder?.order_no || ''} disabled={loadingCustomers}>
                   <option value="">{loadingCustomers ? 'Loading...' : 'Select Order'}</option>
                   {customers.map((c) => (
-                    <option key={c.order_no} value={c.order_no}>
-                      {c.order_no} - {c.customer_name}
-                    </option>
+                    <option key={c.order_no} value={c.order_no}>{c.order_no} - {c.customer_name}</option>
                   ))}
                 </select>
               </div>
               <div>
                 <label className="label-text">Phone</label>
-                <input
-                  type="text"
-                  className="input-field"
-                  value={selectedOrder?.phone || ''}
-                  readOnly
-                />
+                <input type="text" className="input-field" value={selectedOrder?.phone || ''} readOnly />
               </div>
             </div>
           </div>
@@ -169,50 +116,23 @@ export default function CashMemoPage() {
                 <div key={index} className="flex gap-3 items-end">
                   <div className="w-12">
                     <label className="label-text text-xs">S.No</label>
-                    <input
-                      type="number"
-                      className="input-field"
-                      value={item.sno}
-                      readOnly
-                    />
+                    <input type="number" className="input-field" value={item.sno} readOnly />
                   </div>
                   <div className="flex-1">
                     <label className="label-text text-xs">Detail</label>
-                    <input
-                      type="text"
-                      className="input-field"
-                      value={item.detail}
-                      onChange={(e) => updateItem(index, 'detail', e.target.value)}
-                      placeholder="Item description"
-                    />
+                    <input type="text" className="input-field" value={item.detail} onChange={(e) => updateItem(index, 'detail', e.target.value)} placeholder="Item description" />
                   </div>
                   <div className="w-24">
                     <label className="label-text text-xs">Rate</label>
-                    <input
-                      type="number"
-                      className="input-field"
-                      value={item.rate}
-                      onChange={(e) => updateItem(index, 'rate', Number(e.target.value))}
-                    />
+                    <input type="number" className="input-field" value={item.rate} onChange={(e) => updateItem(index, 'rate', Number(e.target.value))} />
                   </div>
                   <div className="w-16">
                     <label className="label-text text-xs">Qty</label>
-                    <input
-                      type="number"
-                      className="input-field"
-                      value={item.qty}
-                      onChange={(e) => updateItem(index, 'qty', Number(e.target.value))}
-                      min={1}
-                    />
+                    <input type="number" className="input-field" value={item.qty} onChange={(e) => updateItem(index, 'qty', Number(e.target.value))} min={1} />
                   </div>
                   <div className="w-28">
                     <label className="label-text text-xs">Amount</label>
-                    <input
-                      type="number"
-                      className="input-field"
-                      value={item.amount}
-                      readOnly
-                    />
+                    <input type="number" className="input-field" value={item.amount} readOnly />
                   </div>
                 </div>
               ))}
@@ -224,18 +144,11 @@ export default function CashMemoPage() {
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-warm-500">Advance Received:</span>
-                <input
-                  type="number"
-                  className="input-field w-32 text-right"
-                  value={advanceReceived}
-                  onChange={(e) => setAdvanceReceived(Number(e.target.value))}
-                />
+                <input type="number" className="input-field w-32 text-right" value={advanceReceived} onChange={(e) => setAdvanceReceived(Number(e.target.value))} />
               </div>
               <div className="flex justify-between text-sm font-bold">
                 <span className="text-warm-700">Remaining:</span>
-                <span className={remaining >= 0 ? 'text-green-600' : 'text-red-600'}>
-                  Rs. {remaining.toLocaleString()}
-                </span>
+                <span className={remaining >= 0 ? 'text-green-600' : 'text-red-600'}>Rs. {remaining.toLocaleString()}</span>
               </div>
             </div>
           </div>
@@ -244,83 +157,109 @@ export default function CashMemoPage() {
 
       {/* Print Layout */}
       <div className="print-only" ref={printRef}>
-        <div style={{ maxWidth: '540px', margin: '0 auto', fontFamily: "'Segoe UI', Arial, sans-serif", color: '#1a1a1a', background: '#fff', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ maxWidth: '560px', margin: '0 auto', fontFamily: "'Segoe UI', Arial, sans-serif", color: '#1a1a1a', background: '#fff', position: 'relative', overflow: 'hidden' }}>
 
-          {/* Background decorative pattern */}
-          <div style={{ position: 'absolute', top: 0, right: 0, width: '220px', height: '220px', background: 'radial-gradient(circle at top right, rgba(201,165,92,0.08) 0%, transparent 70%)', pointerEvents: 'none' }}></div>
-          <div style={{ position: 'absolute', bottom: 0, left: 0, width: '180px', height: '180px', background: 'radial-gradient(circle at bottom left, rgba(26,26,46,0.04) 0%, transparent 70%)', pointerEvents: 'none' }}></div>
+          {/* Top Section */}
+          <div style={{ display: 'flex', alignItems: 'stretch', minHeight: '200px' }}>
 
-          {/* Top Section - Header with Sofa */}
-          <div style={{ display: 'flex', alignItems: 'stretch', minHeight: '180px' }}>
             {/* Left - Branding */}
-            <div style={{ flex: 1, padding: '28px 20px 20px 28px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-              <div style={{ fontSize: '10px', letterSpacing: '5px', textTransform: 'uppercase', color: '#C9A55C', fontWeight: '600', marginBottom: '4px' }}>Welcome to</div>
-              <h1 style={{ fontSize: '28px', fontWeight: '800', margin: 0, color: '#1a1a2e', lineHeight: '1.1', letterSpacing: '-0.5px' }}>RAJPOOT</h1>
-              <h1 style={{ fontSize: '28px', fontWeight: '800', margin: 0, color: '#1a1a2e', lineHeight: '1.1', letterSpacing: '-0.5px' }}>FURNITURE</h1>
-              <div style={{ width: '50px', height: '3px', background: 'linear-gradient(90deg, #C9A55C, #FFC726)', margin: '10px 0', borderRadius: '2px' }}></div>
-              <div style={{ fontSize: '10px', color: '#888', lineHeight: '1.6' }}>
+            <div style={{ flex: 1, padding: '30px 20px 24px 30px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+              <div style={{ fontSize: '9px', letterSpacing: '5px', textTransform: 'uppercase', color: '#C9A55C', fontWeight: '700', marginBottom: '6px' }}>Welcome to</div>
+              <h1 style={{ fontSize: '32px', fontWeight: '900', margin: 0, color: '#1a1a2e', lineHeight: '1.05', letterSpacing: '-0.5px' }}>RAJPOOT</h1>
+              <h1 style={{ fontSize: '32px', fontWeight: '900', margin: 0, color: '#1a1a2e', lineHeight: '1.05', letterSpacing: '-0.5px' }}>FURNITURE</h1>
+              <div style={{ width: '45px', height: '3px', background: 'linear-gradient(90deg, #C9A55C, #FFC726)', margin: '12px 0', borderRadius: '2px' }}></div>
+              <div style={{ fontSize: '10px', color: '#777', lineHeight: '1.7' }}>
                 Muhammad Abbas: 0300-8583823<br/>
                 Junaid Abbas: 0318-6497054
               </div>
             </div>
 
-            {/* Right - 3D Sofa SVG */}
-            <div style={{ width: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-              <svg width="190" height="150" viewBox="0 0 190 150" fill="none" xmlns="http://www.w3.org/2000/svg">
-                {/* Shadow */}
-                <ellipse cx="95" cy="140" rx="80" ry="8" fill="rgba(0,0,0,0.08)"/>
-                {/* Sofa back - tufted */}
-                <path d="M30 55 C30 30, 50 18, 95 18 C140 18, 160 30, 160 55 L160 85 C160 88, 158 90, 155 90 L35 90 C32 90, 30 88, 30 85 Z" fill="url(#sofaBack)"/>
-                {/* Tufting lines */}
-                <path d="M55 28 L55 82" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/>
-                <path d="M75 22 L75 82" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/>
-                <path d="M95 20 L95 82" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/>
-                <path d="M115 22 L115 82" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/>
-                <path d="M135 28 L135 82" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/>
+            {/* Right - Realistic Sofa */}
+            <div style={{ width: '220px', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', paddingBottom: '10px', position: 'relative' }}>
+              <svg width="210" height="170" viewBox="0 0 210 170" fill="none" xmlns="http://www.w3.org/2000/svg">
+                {/* Shadow under sofa */}
+                <ellipse cx="105" cy="158" rx="85" ry="6" fill="rgba(0,0,0,0.06)"/>
+
+                {/* Sofa back - large rounded with tufted look */}
+                <path d="M28 60 C28 28, 55 12, 105 12 C155 12, 182 28, 182 60 L182 92 C182 96, 179 98, 175 98 L35 98 C31 98, 28 96, 28 92 Z" fill="url(#sofaBackGrad)"/>
+
+                {/* Back cushion highlights - curved lines for tufting */}
+                <path d="M50 25 Q50 55, 50 90" stroke="rgba(180,160,130,0.25)" strokeWidth="1.2" fill="none"/>
+                <path d="M75 18 Q75 55, 75 90" stroke="rgba(180,160,130,0.25)" strokeWidth="1.2" fill="none"/>
+                <path d="M105 16 Q105 55, 105 90" stroke="rgba(180,160,130,0.25)" strokeWidth="1.2" fill="none"/>
+                <path d="M135 18 Q135 55, 135 90" stroke="rgba(180,160,130,0.25)" strokeWidth="1.2" fill="none"/>
+                <path d="M160 25 Q160 55, 160 90" stroke="rgba(180,160,130,0.25)" strokeWidth="1.2" fill="none"/>
+
+                {/* Tufting diamond pattern */}
+                <path d="M62 40 L75 55 L62 70" stroke="rgba(160,140,110,0.15)" strokeWidth="0.8" fill="none"/>
+                <path d="M88 35 L100 50 L88 65" stroke="rgba(160,140,110,0.15)" strokeWidth="0.8" fill="none"/>
+                <path d="M118 35 L130 50 L118 65" stroke="rgba(160,140,110,0.15)" strokeWidth="0.8" fill="none"/>
+                <path d="M148 40 L160 55 L148 70" stroke="rgba(160,140,110,0.15)" strokeWidth="0.8" fill="none"/>
+
                 {/* Tufting buttons */}
-                <circle cx="55" cy="45" r="2.5" fill="rgba(201,165,92,0.4)"/>
-                <circle cx="75" cy="42" r="2.5" fill="rgba(201,165,92,0.4)"/>
-                <circle cx="95" cy="40" r="2.5" fill="rgba(201,165,92,0.4)"/>
-                <circle cx="115" cy="42" r="2.5" fill="rgba(201,165,92,0.4)"/>
-                <circle cx="135" cy="45" r="2.5" fill="rgba(201,165,92,0.4)"/>
+                <circle cx="62" cy="55" r="2" fill="rgba(180,155,110,0.35)"/>
+                <circle cx="88" cy="50" r="2" fill="rgba(180,155,110,0.35)"/>
+                <circle cx="105" cy="48" r="2" fill="rgba(180,155,110,0.35)"/>
+                <circle cx="118" cy="50" r="2" fill="rgba(180,155,110,0.35)"/>
+                <circle cx="148" cy="55" r="2" fill="rgba(180,155,110,0.35)"/>
+
                 {/* Sofa seat */}
-                <path d="M22 85 L22 105 C22 110, 26 113, 30 113 L160 113 C164 113, 168 110, 168 105 L168 85 Z" fill="url(#sofaSeat)"/>
-                {/* Seat cushion line */}
-                <path d="M95 88 L95 110" stroke="rgba(0,0,0,0.08)" strokeWidth="1"/>
-                {/* Left armrest */}
-                <path d="M12 55 C8 55, 5 60, 5 70 L5 105 C5 112, 10 115, 16 115 L22 115 L22 55 Z" fill="url(#armrest)"/>
-                {/* Right armrest */}
-                <path d="M178 55 C182 55, 185 60, 185 70 L185 105 C185 112, 180 115, 174 115 L168 115 L168 55 Z" fill="url(#armrest)"/>
-                {/* Legs */}
-                <rect x="30" y="113" width="6" height="16" rx="1.5" fill="#8B7355"/>
-                <rect x="154" y="113" width="6" height="16" rx="1.5" fill="#8B7355"/>
-                <rect x="75" y="113" width="5" height="14" rx="1.5" fill="#8B7355"/>
-                <rect x="110" y="113" width="5" height="14" rx="1.5" fill="#8B7355"/>
-                {/* Cushion highlight */}
-                <path d="M35 90 Q95 80, 155 90" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" fill="none"/>
-                {/* Pillows */}
-                <ellipse cx="50" cy="65" rx="18" ry="14" fill="url(#pillow1)" opacity="0.9"/>
-                <ellipse cx="140" cy="65" rx="18" ry="14" fill="url(#pillow2)" opacity="0.9"/>
+                <path d="M20 95 L20 120 C20 126, 25 130, 32 130 L178 130 C185 130, 190 126, 190 120 L190 95 Z" fill="url(#sofaSeatGrad)"/>
+
+                {/* Seat cushion dividers */}
+                <path d="M70 98 L70 127" stroke="rgba(160,140,110,0.15)" strokeWidth="1"/>
+                <path d="M105 97 L105 128" stroke="rgba(160,140,110,0.18)" strokeWidth="1"/>
+                <path d="M140 98 L140 127" stroke="rgba(160,140,110,0.15)" strokeWidth="1"/>
+
+                {/* Seat cushion top highlight */}
+                <path d="M30 98 Q105 88, 180 98" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" fill="none"/>
+
+                {/* Left armrest - rounded front */}
+                <path d="M10 52 C4 52, 0 58, 0 68 L0 118 C0 128, 6 132, 14 132 L22 132 L22 52 Z" fill="url(#armGrad)"/>
+                <path d="M10 52 C6 52, 3 56, 3 62 L3 115 C3 122, 7 125, 12 125" stroke="rgba(255,255,255,0.15)" strokeWidth="1" fill="none"/>
+
+                {/* Right armrest - rounded front */}
+                <path d="M200 52 C206 52, 210 58, 210 68 L210 118 C210 128, 204 132, 196 132 L188 132 L188 52 Z" fill="url(#armGrad)"/>
+                <path d="M200 52 C204 52, 207 56, 207 62 L207 115 C207 122, 203 125, 198 125" stroke="rgba(255,255,255,0.15)" strokeWidth="1" fill="none"/>
+
+                {/* Wooden legs */}
+                <rect x="32" y="130" width="7" height="18" rx="2" fill="url(#legGrad)"/>
+                <rect x="85" y="130" width="6" height="16" rx="2" fill="url(#legGrad)"/>
+                <rect x="119" y="130" width="6" height="16" rx="2" fill="url(#legGrad)"/>
+                <rect x="171" y="130" width="7" height="18" rx="2" fill="url(#legGrad)"/>
+
+                {/* Decorative pillows */}
+                <ellipse cx="52" cy="68" rx="20" ry="16" fill="url(#pillowGold)" transform="rotate(-8 52 68)"/>
+                <ellipse cx="158" cy="68" rx="20" ry="16" fill="url(#pillowDark)" transform="rotate(8 158 68)"/>
+                {/* Pillow highlights */}
+                <ellipse cx="50" cy="62" rx="10" ry="6" fill="rgba(255,255,255,0.12)" transform="rotate(-8 50 62)"/>
+                <ellipse cx="160" cy="62" rx="10" ry="6" fill="rgba(255,255,255,0.08)" transform="rotate(8 160 62)"/>
+
                 <defs>
-                  <linearGradient id="sofaBack" x1="95" y1="18" x2="95" y2="90">
-                    <stop offset="0%" stopColor="#F5F0E8"/>
-                    <stop offset="100%" stopColor="#E8DFD0"/>
+                  <linearGradient id="sofaBackGrad" x1="105" y1="12" x2="105" y2="98">
+                    <stop offset="0%" stopColor="#F8F3EB"/>
+                    <stop offset="50%" stopColor="#F0E8DA"/>
+                    <stop offset="100%" stopColor="#E6DCCB"/>
                   </linearGradient>
-                  <linearGradient id="sofaSeat" x1="95" y1="85" x2="95" y2="113">
+                  <linearGradient id="sofaSeatGrad" x1="105" y1="95" x2="105" y2="130">
                     <stop offset="0%" stopColor="#EDE5D8"/>
-                    <stop offset="100%" stopColor="#DDD4C4"/>
+                    <stop offset="100%" stopColor="#DDD4C2"/>
                   </linearGradient>
-                  <linearGradient id="armrest" x1="0" y1="55" x2="0" y2="115">
-                    <stop offset="0%" stopColor="#F0E8DC"/>
-                    <stop offset="100%" stopColor="#DDD4C4"/>
+                  <linearGradient id="armGrad" x1="0" y1="52" x2="22" y2="132">
+                    <stop offset="0%" stopColor="#F2EAE0"/>
+                    <stop offset="100%" stopColor="#DDD4C2"/>
                   </linearGradient>
-                  <linearGradient id="pillow1" x1="50" y1="51" x2="50" y2="79">
-                    <stop offset="0%" stopColor="#C9A55C"/>
+                  <linearGradient id="legGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#A08060"/>
+                    <stop offset="100%" stopColor="#7A6045"/>
+                  </linearGradient>
+                  <linearGradient id="pillowGold" x1="52" y1="52" x2="52" y2="84">
+                    <stop offset="0%" stopColor="#D4B06A"/>
                     <stop offset="100%" stopColor="#B8944A"/>
                   </linearGradient>
-                  <linearGradient id="pillow2" x1="140" y1="51" x2="140" y2="79">
-                    <stop offset="0%" stopColor="#1a1a2e"/>
-                    <stop offset="100%" stopColor="#16213e"/>
+                  <linearGradient id="pillowDark" x1="158" y1="52" x2="158" y2="84">
+                    <stop offset="0%" stopColor="#2A2A42"/>
+                    <stop offset="100%" stopColor="#1A1A2E"/>
                   </linearGradient>
                 </defs>
               </svg>
@@ -328,50 +267,55 @@ export default function CashMemoPage() {
           </div>
 
           {/* Gold accent line */}
-          <div style={{ height: '4px', background: 'linear-gradient(90deg, #C9A55C 0%, #FFC726 50%, #C9A55C 100%)' }}></div>
+          <div style={{ height: '3px', background: 'linear-gradient(90deg, #C9A55C 0%, #FFC726 50%, #C9A55C 100%)' }}></div>
 
-          {/* CASH MEMO Title */}
-          <div style={{ padding: '18px 28px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+          {/* CASH MEMO Title + Invoice Info */}
+          <div style={{ padding: '16px 30px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
-              <h2 style={{ fontSize: '22px', fontWeight: '800', color: '#1a1a2e', margin: 0, letterSpacing: '4px' }}>CASH MEMO</h2>
-              <div style={{ width: '40px', height: '2px', background: '#C9A55C', marginTop: '4px' }}></div>
+              <h2 style={{ fontSize: '20px', fontWeight: '800', color: '#1a1a2e', margin: 0, letterSpacing: '4px' }}>CASH MEMO</h2>
+              <div style={{ width: '35px', height: '2.5px', background: '#C9A55C', marginTop: '5px', borderRadius: '2px' }}></div>
             </div>
-            <div style={{ textAlign: 'right', fontSize: '12px' }}>
+            <div style={{ textAlign: 'right', fontSize: '12px', lineHeight: '1.8' }}>
               <div><strong style={{ color: '#1a1a2e' }}>Invoice:</strong> <span style={{ color: '#555' }}>{memoNo}</span></div>
               <div><strong style={{ color: '#1a1a2e' }}>Date:</strong> <span style={{ color: '#555' }}>{memoDate}</span></div>
             </div>
           </div>
 
           {/* Customer Info */}
-          <div style={{ padding: '0 28px 14px', fontSize: '12.5px' }}>
-            <div style={{ display: 'flex', gap: '40px', marginBottom: '4px' }}>
-              <span><strong style={{ color: '#1a1a2e' }}>Name:</strong> <span style={{ color: '#555' }}>{selectedOrder?.customer_name || '___________________________'}</span></span>
-              <span><strong style={{ color: '#1a1a2e' }}>Order No:</strong> <span style={{ color: '#555' }}>{selectedOrder?.order_no || '___________'}</span></span>
+          <div style={{ padding: '0 30px 14px', fontSize: '12.5px', display: 'flex', gap: '36px' }}>
+            <div>
+              <strong style={{ color: '#1a1a2e' }}>Name: </strong>
+              <span style={{ color: '#555', borderBottom: '1px solid #ddd', paddingBottom: '1px' }}>{selectedOrder?.customer_name || '___________________________'}</span>
             </div>
             <div>
-              <span><strong style={{ color: '#1a1a2e' }}>Phone:</strong> <span style={{ color: '#555' }}>{selectedOrder?.phone || '___________________________'}</span></span>
+              <strong style={{ color: '#1a1a2e' }}>Order No: </strong>
+              <span style={{ color: '#555', borderBottom: '1px solid #ddd', paddingBottom: '1px' }}>{selectedOrder?.order_no || '___________'}</span>
+            </div>
+            <div>
+              <strong style={{ color: '#1a1a2e' }}>Phone: </strong>
+              <span style={{ color: '#555', borderBottom: '1px solid #ddd', paddingBottom: '1px' }}>{selectedOrder?.phone || '___________________________'}</span>
             </div>
           </div>
 
-          <div style={{ height: '1px', background: 'linear-gradient(90deg, transparent, #e0d8c8, transparent)', margin: '0 28px' }}></div>
+          <div style={{ height: '1px', background: 'linear-gradient(90deg, transparent 0%, #d4c9b8 50%, transparent 100%)', margin: '0 30px' }}></div>
 
           {/* Items Table */}
-          <div style={{ padding: '14px 28px' }}>
+          <div style={{ padding: '14px 30px' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
               <thead>
                 <tr>
-                  <th style={{ background: '#1a1a2e', color: '#fff', padding: '10px 8px', textAlign: 'center', fontWeight: '600', fontSize: '10px', letterSpacing: '1px', textTransform: 'uppercase', borderRadius: '4px 0 0 0' }}>#</th>
-                  <th style={{ background: '#1a1a2e', color: '#fff', padding: '10px 8px', textAlign: 'left', fontWeight: '600', fontSize: '10px', letterSpacing: '1px', textTransform: 'uppercase' }}>Description</th>
-                  <th style={{ background: '#1a1a2e', color: '#fff', padding: '10px 8px', textAlign: 'center', fontWeight: '600', fontSize: '10px', letterSpacing: '1px', textTransform: 'uppercase' }}>Qty</th>
-                  <th style={{ background: '#1a1a2e', color: '#fff', padding: '10px 8px', textAlign: 'right', fontWeight: '600', fontSize: '10px', letterSpacing: '1px', textTransform: 'uppercase' }}>Rate</th>
-                  <th style={{ background: '#1a1a2e', color: '#fff', padding: '10px 8px', textAlign: 'right', fontWeight: '600', fontSize: '10px', letterSpacing: '1px', textTransform: 'uppercase', borderRadius: '0 4px 0 0' }}>Total</th>
+                  <th style={{ background: '#1a1a2e', color: '#fff', padding: '9px 8px', textAlign: 'center', fontWeight: '700', fontSize: '9px', letterSpacing: '1.5px', textTransform: 'uppercase', borderRadius: '4px 0 0 0' }}>#</th>
+                  <th style={{ background: '#1a1a2e', color: '#fff', padding: '9px 8px', textAlign: 'left', fontWeight: '700', fontSize: '9px', letterSpacing: '1.5px', textTransform: 'uppercase' }}>Description</th>
+                  <th style={{ background: '#1a1a2e', color: '#fff', padding: '9px 8px', textAlign: 'center', fontWeight: '700', fontSize: '9px', letterSpacing: '1.5px', textTransform: 'uppercase' }}>Qty</th>
+                  <th style={{ background: '#1a1a2e', color: '#fff', padding: '9px 8px', textAlign: 'right', fontWeight: '700', fontSize: '9px', letterSpacing: '1.5px', textTransform: 'uppercase' }}>Rate</th>
+                  <th style={{ background: '#1a1a2e', color: '#fff', padding: '9px 8px', textAlign: 'right', fontWeight: '700', fontSize: '9px', letterSpacing: '1.5px', textTransform: 'uppercase', borderRadius: '0 4px 0 0' }}>Total</th>
                 </tr>
               </thead>
               <tbody>
                 {items.map((item, i) => (
                   <tr key={i} style={{ borderBottom: '1px solid #f0ebe0' }}>
-                    <td style={{ padding: '10px 8px', textAlign: 'center', color: '#C9A55C', fontWeight: '700', fontSize: '13px' }}>{item.sno}</td>
-                    <td style={{ padding: '10px 8px', color: '#333', fontSize: '12px' }}>{item.detail}</td>
+                    <td style={{ padding: '10px 8px', textAlign: 'center', color: '#C9A55C', fontWeight: '800', fontSize: '13px' }}>{item.sno}</td>
+                    <td style={{ padding: '10px 8px', color: '#333', fontSize: '12px', lineHeight: '1.4' }}>{item.detail}</td>
                     <td style={{ padding: '10px 8px', textAlign: 'center', color: '#555', fontWeight: '600' }}>{item.qty}</td>
                     <td style={{ padding: '10px 8px', textAlign: 'right', color: '#555' }}>{item.rate.toLocaleString()}</td>
                     <td style={{ padding: '10px 8px', textAlign: 'right', fontWeight: '700', color: '#1a1a2e', fontSize: '12.5px' }}>{item.amount.toLocaleString()}</td>
@@ -381,37 +325,37 @@ export default function CashMemoPage() {
             </table>
           </div>
 
-          <div style={{ height: '1px', background: 'linear-gradient(90deg, transparent, #e0d8c8, transparent)', margin: '0 28px' }}></div>
+          <div style={{ height: '1px', background: 'linear-gradient(90deg, transparent 0%, #d4c9b8 50%, transparent 100%)', margin: '0 30px' }}></div>
 
           {/* Totals */}
-          <div style={{ padding: '14px 28px', display: 'flex', justifyContent: 'flex-end' }}>
-            <div style={{ width: '220px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '12.5px' }}>
-                <span style={{ color: '#888' }}>Subtotal</span>
-                <span style={{ fontWeight: '600', color: '#333' }}>Rs. {total.toLocaleString()}</span>
+          <div style={{ padding: '14px 30px', display: 'flex', justifyContent: 'flex-end' }}>
+            <div style={{ width: '230px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '12px' }}>
+                <span style={{ color: '#999' }}>Subtotal</span>
+                <span style={{ fontWeight: '600', color: '#444' }}>Rs. {total.toLocaleString()}</span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '12.5px' }}>
-                <span style={{ color: '#888' }}>Advance Received</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '12px' }}>
+                <span style={{ color: '#999' }}>Advance Received</span>
                 <span style={{ color: '#555' }}>Rs. {advanceReceived.toLocaleString()}</span>
               </div>
-              <div style={{ borderTop: '2px solid #C9A55C', paddingTop: '8px', marginTop: '4px', display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ fontWeight: '700', fontSize: '14px', color: '#1a1a2e' }}>REMAINING</span>
-                <span style={{ fontWeight: '800', fontSize: '16px', color: '#C9A55C' }}>Rs. {remaining.toLocaleString()}</span>
+              <div style={{ borderTop: '2px solid #C9A55C', paddingTop: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontWeight: '700', fontSize: '13px', color: '#1a1a2e', letterSpacing: '1px' }}>REMAINING</span>
+                <span style={{ fontWeight: '800', fontSize: '17px', color: '#C9A55C' }}>Rs. {remaining.toLocaleString()}</span>
               </div>
             </div>
           </div>
 
           {/* Footer */}
-          <div style={{ background: '#faf8f4', padding: '18px 28px', borderTop: '1px solid #f0ebe0' }}>
-            <div style={{ fontSize: '11px', color: '#999', textAlign: 'center', marginBottom: '12px', fontStyle: 'italic' }}>
+          <div style={{ background: '#faf8f4', padding: '20px 30px', borderTop: '1px solid #f0ebe0' }}>
+            <div style={{ fontSize: '11px', color: '#aaa', textAlign: 'center', marginBottom: '14px', fontStyle: 'italic' }}>
               Thank you for choosing Rajput Furniture House!
             </div>
 
-            {/* Bottom branding bar */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', padding: '10px 0', borderTop: '1px solid #e8e0d0' }}>
-              <div style={{ width: '30px', height: '1px', background: '#C9A55C' }}></div>
-              <div style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '3px', color: '#1a1a2e', textTransform: 'uppercase' }}>Rajput Furniture House</div>
-              <div style={{ width: '30px', height: '1px', background: '#C9A55C' }}></div>
+            {/* Branding bar */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', paddingTop: '10px', borderTop: '1px solid #e8e0d0' }}>
+              <div style={{ width: '25px', height: '1px', background: '#C9A55C' }}></div>
+              <div style={{ fontSize: '9px', fontWeight: '700', letterSpacing: '4px', color: '#1a1a2e', textTransform: 'uppercase' }}>Rajput Furniture House</div>
+              <div style={{ width: '25px', height: '1px', background: '#C9A55C' }}></div>
             </div>
           </div>
 
