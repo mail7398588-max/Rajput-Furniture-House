@@ -40,6 +40,11 @@
   .table-scroll-container {
     @apply overflow-x-auto;
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .table-scroll-container::-webkit-scrollbar {
+    display: none;
   }
 
   .table-scroll-container table thead th {
@@ -65,14 +70,18 @@
   }
 
   .floating-scrollbar-wrapper {
-    @apply fixed bottom-0 left-0 right-0 z-50 px-4 pb-2 pointer-events-none;
+    @apply fixed bottom-0 left-0 right-0 z-50 px-4 pb-3 pointer-events-none;
+    display: flex;
+    justify-content: center;
   }
 
   .floating-scrollbar-track {
-    @apply w-full h-3 rounded-full overflow-x-auto overflow-y-hidden pointer-events-auto;
-    background: rgba(250, 240, 220, 0.9);
+    @apply h-2.5 rounded-full pointer-events-auto;
+    width: min(85vw, 700px);
+    background: rgba(250, 240, 220, 0.92);
     backdrop-filter: blur(8px);
-    border: 1px solid rgba(201, 165, 92, 0.3);
+    border: 1px solid rgba(201, 165, 92, 0.35);
+    overflow-x: auto;
     scrollbar-width: none;
   }
 
@@ -83,7 +92,8 @@
   .floating-scrollbar-thumb {
     @apply h-full rounded-full;
     background: linear-gradient(90deg, #C9A55C, #FFC726, #C9A55C);
-    min-width: 40px;
+    width: 40%;
+    min-width: 50px;
   }
 
   .status-badge {

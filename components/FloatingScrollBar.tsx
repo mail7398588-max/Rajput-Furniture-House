@@ -3,10 +3,8 @@
 import { useEffect, useRef, useState } from 'react'
 
 export default function FloatingScrollBar({ containerRef }: { containerRef: React.RefObject<HTMLDivElement | null> }) {
-  const scrollRef = useRef<HTMLDivElement>(null)
+  const trackRef = useRef<HTMLDivElement>(null)
   const [visible, setVisible] = useState(false)
-  const [scrollWidth, setScrollWidth] = useState(0)
-  const [clientWidth, setClientWidth] = useState(0)
   const syncing = useRef(false)
 
   useEffect(() => {
@@ -14,11 +12,7 @@ export default function FloatingScrollBar({ containerRef }: { containerRef: Reac
     if (!container) return
 
     function check() {
-      const sw = container!.scrollWidth
-      const cw = container!.clientWidth
-      setScrollWidth(sw)
-      setClientWidth(cw)
-      setVisible(sw > cw + 10)
+      setVisible(container!.scrollWidth > container!.clientWidth + 10)
     }
 
     check()
@@ -29,46 +23,43 @@ export default function FloatingScrollBar({ containerRef }: { containerRef: Reac
 
   useEffect(() => {
     const container = containerRef.current
-    const scrollbar = scrollRef.current
-    if (!container || !scrollbar) return
+    const track = trackRef.current
+    if (!container || !track || !visible) return
 
     const containerEl = container
-    const scrollbarEl = scrollbar
+    const trackEl = track
 
     function syncFromContainer() {
       if (syncing.current) return
       syncing.current = true
-      scrollbarEl.scrollLeft = containerEl.scrollLeft
+      const ratio = containerEl.scrollLeft / (containerEl.scrollWidth - containerEl.clientWidth || 1)
+      trackEl.scrollLeft = ratio * (trackEl.scrollWidth - trackEl.clientWidth)
       syncing.current = false
     }
 
-    function syncFromScrollbar() {
+    function syncFromTrack() {
       if (syncing.current) return
       syncing.current = true
-      containerEl.scrollLeft = scrollbarEl.scrollLeft
+      const ratio = trackEl.scrollLeft / (trackEl.scrollWidth - trackEl.clientWidth || 1)
+      containerEl.scrollLeft = ratio * (containerEl.scrollWidth - containerEl.clientWidth)
       syncing.current = false
     }
 
     containerEl.addEventListener('scroll', syncFromContainer, { passive: true })
-    scrollbarEl.addEventListener('scroll', syncFromScrollbar, { passive: true })
+    trackEl.addEventListener('scroll', syncFromTrack, { passive: true })
 
     return () => {
       containerEl.removeEventListener('scroll', syncFromContainer)
-      scrollbarEl.removeEventListener('scroll', syncFromScrollbar)
+      trackEl.removeEventListener('scroll', syncFromTrack)
     }
-  }, [containerRef])
+  }, [containerRef, visible])
 
   if (!visible) return null
 
-  const ratio = clientWidth / scrollWidth
-
   return (
     <div className="floating-scrollbar-wrapper">
-      <div ref={scrollRef} className="floating-scrollbar-track">
-        <div
-          className="floating-scrollbar-thumb"
-          style={{ width: `${ratio * 100}%` }}
-        />
+      <div ref={trackRef} className="floating-scrollbar-track">
+        <div className="floating-scrollbar-thumb" />
       </div>
     </div>
   )
