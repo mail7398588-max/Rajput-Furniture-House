@@ -62,8 +62,10 @@ export default function AttendancePage() {
     advance: number
     paid_amount: number
   }>>({})
+  const [prevMonthRemainings, setPrevMonthRemainings] = useState<Record<string, number>>({})
 
   useEffect(() => { fetchRecords() }, [selectedMonth, selectedYear])
+  useEffect(() => { fetchPrevMonthRemainings() }, [selectedMonth, selectedYear])
 
   async function fetchRecords() {
     try {
@@ -77,6 +79,23 @@ export default function AttendancePage() {
       toast('Failed to load records', 'error')
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function fetchPrevMonthRemainings() {
+    const monthIndex = monthNames.indexOf(selectedMonth)
+    const prevMonth = monthIndex === 0 ? monthNames[11] : monthNames[monthIndex - 1]
+    const prevYear = monthIndex === 0 ? selectedYear - 1 : selectedYear
+    try {
+      const { data, error } = await db()
+        .from('attendance').select('worker_name, remaining')
+        .eq('month', prevMonth).eq('year', prevYear)
+      if (error) throw error
+      const map: Record<string, number> = {}
+      ;(data || []).forEach((r) => { map[r.worker_name] = r.remaining || 0 })
+      setPrevMonthRemainings(map)
+    } catch {
+      setPrevMonthRemainings({})
     }
   }
 
@@ -315,6 +334,9 @@ export default function AttendancePage() {
                       <div className="text-center"><p className="text-warm-400 text-[10px] uppercase">Absent</p><p className="font-bold text-red-600">{r.absent_days}</p></div>
                       <div className="text-center"><p className="text-warm-400 text-[10px] uppercase">Half</p><p className="font-bold text-yellow-600">{r.half_days}</p></div>
                       <div className="text-center"><p className="text-warm-400 text-[10px] uppercase">OT Hrs</p><p className="font-bold text-blue-600">{totalOT}</p></div>
+                      {(prevMonthRemainings[r.worker_name] || 0) > 0 && (
+                        <div className="text-center"><p className="text-warm-400 text-[10px] uppercase">Prev Due</p><p className="font-bold text-orange-600">Rs. {prevMonthRemainings[r.worker_name]?.toLocaleString()}</p></div>
+                      )}
                       <div className="text-center"><p className="text-warm-400 text-[10px] uppercase">Gross</p><p className="font-bold">Rs. {(r.gross_salary || 0).toLocaleString()}</p></div>
                       <div className="text-center"><p className="text-warm-400 text-[10px] uppercase">Net</p><p className="font-bold text-primary-600">Rs. {(r.net_payable || 0).toLocaleString()}</p></div>
                       <button onClick={() => openEditModal(r)} className="p-1.5 rounded-lg text-blue-500 hover:bg-blue-50"><Edit size={15} /></button>
