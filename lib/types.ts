@@ -55,7 +55,8 @@ export interface Attendance {
   month: string
   year: number
   working_days: number
-  attendance_data: Record<string, 'P' | 'A' | 'H'>
+  attendance_data: Record<string, string>
+  ot_data: Record<string, number>
   present_days: number
   absent_days: number
   half_days: number

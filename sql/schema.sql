@@ -65,6 +65,7 @@ create table if not exists attendance (
   year integer not null,
   working_days integer default 26,
   attendance_data jsonb default '{}',
+  ot_data jsonb default '{}',
   present_days integer default 0,
   absent_days integer default 0,
   half_days integer default 0,

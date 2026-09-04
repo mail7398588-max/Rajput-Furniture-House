@@ -68,11 +68,16 @@ export default function CashMemoPage() {
         .select('*')
         .order('created_at', { ascending: false })
         .limit(50)
-      if (error) throw error
+      if (error) {
+        if (error.code === '42P01' || error.message?.includes('does not exist')) {
+          setPastMemos([])
+          return
+        }
+        throw error
+      }
       setPastMemos((data || []) as SavedMemo[])
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to load past memos'
-      toast(msg, 'error')
+    } catch {
+      setPastMemos([])
     } finally {
       setLoadingMemos(false)
     }
@@ -144,12 +149,17 @@ export default function CashMemoPage() {
       const { error } = await db()
         .from('cash_memos')
         .insert(payload)
-      if (error) throw error
+      if (error) {
+        if (error.code === '42P01' || error.message?.includes('does not exist')) {
+          toast('Please create cash_memos table in Supabase first. Run the SQL from schema.sql.', 'error')
+          return
+        }
+        throw error
+      }
       toast('Memo saved successfully', 'success')
       fetchPastMemos()
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to save memo'
-      toast(msg, 'error')
+    } catch {
+      toast('Failed to save memo', 'error')
     } finally {
       setSaving(false)
     }
