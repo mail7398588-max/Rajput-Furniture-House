@@ -191,7 +191,7 @@ export default function OrdersPage() {
       </div>
 
       <div className="stat-card p-0">
-        <div className="table-scroll-container max-h-[60vh]">
+        <div className="table-scroll-container">
           <table className="w-full min-w-[800px]">
             <thead>
               <tr className="table-header">

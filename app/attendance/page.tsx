@@ -310,7 +310,7 @@ export default function AttendancePage() {
       </div>
 
       <div className="stat-card p-0">
-        <div className="table-scroll-container max-h-[60vh]">
+        <div className="table-scroll-container">
           {loading ? (
             <div className="text-center py-8"><div className="w-8 h-8 border-3 border-primary-200 border-t-primary-500 rounded-full animate-spin mx-auto mb-2" /><p className="text-warm-400 text-sm">Loading...</p></div>
           ) : records.length === 0 ? (

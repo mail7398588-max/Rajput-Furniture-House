@@ -46,7 +46,7 @@
   }
 
   .table-scroll-container {
-    @apply overflow-x-auto overflow-y-auto;
+    @apply overflow-x-auto;
     scrollbar-width: thin;
     scrollbar-color: #E2C27D transparent;
   }

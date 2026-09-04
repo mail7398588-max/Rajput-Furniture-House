@@ -216,110 +216,126 @@ export default function CashMemoPage() {
 
       {/* Print Layout */}
       <div className="print-only">
-        <div style={{ maxWidth: '500px', margin: '0 auto', padding: '20px', fontFamily: 'Arial, sans-serif', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ maxWidth: '520px', margin: '0 auto', padding: '0', fontFamily: "'Segoe UI', Arial, sans-serif", color: '#1a1a1a', background: '#fff' }}>
 
-          {/* Watermark */}
-          <div style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%) rotate(-35deg)',
-            textAlign: 'center',
-            opacity: 0.06,
-            pointerEvents: 'none',
-            zIndex: 0,
-            whiteSpace: 'nowrap',
-          }}>
-            <div style={{ fontSize: '42px', fontWeight: 'bold', letterSpacing: '2px', lineHeight: '1.2', color: '#000' }}>
-              RAJPUT FURNITURE
-            </div>
-            <div style={{ fontSize: '16px', fontWeight: '600', marginTop: '6px', color: '#000' }}>
-              Muhammad Abbas: 0300-8583823
-            </div>
-            <div style={{ fontSize: '16px', fontWeight: '600', marginTop: '2px', color: '#000' }}>
-              Junaid Abbas: 0318-6497054
+          {/* Header with decorative border */}
+          <div style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)', color: '#fff', padding: '20px 24px', textAlign: 'center', borderRadius: '0 0 8px 8px' }}>
+            <div style={{ fontSize: '10px', letterSpacing: '4px', textTransform: 'uppercase', opacity: 0.7, marginBottom: '4px' }}>Welcome to</div>
+            <h1 style={{ fontSize: '24px', fontWeight: '800', margin: 0, letterSpacing: '1px' }}>RAJPOOT FURNITURE HOUSE</h1>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: '8px', fontSize: '11px', opacity: 0.85 }}>
+              <span>Muhammad Abbas: 0300-8583823</span>
+              <span style={{ opacity: 0.4 }}>|</span>
+              <span>Junaid Abbas: 0318-6497054</span>
             </div>
           </div>
 
-          {/* Content */}
-          <div style={{ position: 'relative', zIndex: 1 }}>
-          <div style={{ textAlign: 'center', borderBottom: '2px solid black', paddingBottom: '12px', marginBottom: '12px' }}>
-            <h1 style={{ fontSize: '22px', fontWeight: 'bold', margin: 0 }}>RAJPOOT FURNITURE</h1>
-            <p style={{ fontSize: '12px', marginTop: '4px' }}>
-              Muhammad Abbas: 0300-8583823 | Junaid Abbas: 0318-6497054
-            </p>
+          {/* Decorative line */}
+          <div style={{ height: '3px', background: 'linear-gradient(90deg, #C9A55C, #FFC726, #C9A55C)' }}></div>
+
+          {/* Title */}
+          <div style={{ textAlign: 'center', padding: '16px 24px 8px' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: '700', color: '#1a1a2e', margin: 0, letterSpacing: '3px' }}>CASH MEMO</h2>
+            <div style={{ width: '60px', height: '2px', background: '#C9A55C', margin: '6px auto 0' }}></div>
           </div>
 
-          <div style={{ textAlign: 'center', marginBottom: '12px' }}>
-            <h2 style={{ fontSize: '16px', fontWeight: 'bold' }}>CASH MEMO</h2>
-          </div>
-
-          <div style={{ fontSize: '13px', marginBottom: '12px', borderBottom: '1px solid #ccc', paddingBottom: '8px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span><strong>Memo No:</strong> {memoNo}</span>
-              <span><strong>Date:</strong> {memoDate}</span>
+          {/* Memo Info */}
+          <div style={{ padding: '0 24px 14px', fontSize: '12.5px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+              <span><strong style={{ color: '#1a1a2e' }}>Memo No:</strong> <span style={{ color: '#555' }}>{memoNo}</span></span>
+              <span><strong style={{ color: '#1a1a2e' }}>Date:</strong> <span style={{ color: '#555' }}>{memoDate}</span></span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px' }}>
-              <span><strong>Name:</strong> {selectedOrder?.customer_name || '_______________'}</span>
-              <span><strong>Order No:</strong> {selectedOrder?.order_no || '_______________'}</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+              <span><strong style={{ color: '#1a1a2e' }}>Name:</strong> <span style={{ color: '#555' }}>{selectedOrder?.customer_name || '___________________________'}</span></span>
+              <span><strong style={{ color: '#1a1a2e' }}>Order No:</strong> <span style={{ color: '#555' }}>{selectedOrder?.order_no || '___________'}</span></span>
             </div>
-            <div style={{ marginTop: '4px' }}>
-              <span><strong>Phone:</strong> {selectedOrder?.phone || '_______________'}</span>
+            <div>
+              <span><strong style={{ color: '#1a1a2e' }}>Phone:</strong> <span style={{ color: '#555' }}>{selectedOrder?.phone || '___________________________'}</span></span>
             </div>
           </div>
 
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', marginBottom: '12px' }}>
-            <thead>
-              <tr style={{ backgroundColor: '#f0f0f0' }}>
-                <th style={{ border: '1px solid #ccc', padding: '6px' }}>S.No</th>
-                <th style={{ border: '1px solid #ccc', padding: '6px', textAlign: 'left' }}>Detail</th>
-                <th style={{ border: '1px solid #ccc', padding: '6px', textAlign: 'right' }}>Rate</th>
-                <th style={{ border: '1px solid #ccc', padding: '6px', textAlign: 'center' }}>Qty</th>
-                <th style={{ border: '1px solid #ccc', padding: '6px', textAlign: 'right' }}>Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((item, i) => (
-                <tr key={i}>
-                  <td style={{ border: '1px solid #ccc', padding: '6px', textAlign: 'center' }}>{item.sno}</td>
-                  <td style={{ border: '1px solid #ccc', padding: '6px' }}>{item.detail}</td>
-                  <td style={{ border: '1px solid #ccc', padding: '6px', textAlign: 'right' }}>{item.rate.toLocaleString()}</td>
-                  <td style={{ border: '1px solid #ccc', padding: '6px', textAlign: 'center' }}>{item.qty}</td>
-                  <td style={{ border: '1px solid #ccc', padding: '6px', textAlign: 'right' }}>{item.amount.toLocaleString()}</td>
+          <div style={{ height: '1px', background: '#e8e0d0', margin: '0 24px' }}></div>
+
+          {/* Items Table */}
+          <div style={{ padding: '14px 24px' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+              <thead>
+                <tr>
+                  <th style={{ background: '#1a1a2e', color: '#fff', padding: '8px 6px', textAlign: 'center', fontWeight: '600', fontSize: '11px', letterSpacing: '0.5px' }}>S.No</th>
+                  <th style={{ background: '#1a1a2e', color: '#fff', padding: '8px 6px', textAlign: 'left', fontWeight: '600', fontSize: '11px', letterSpacing: '0.5px' }}>Detail</th>
+                  <th style={{ background: '#1a1a2e', color: '#fff', padding: '8px 6px', textAlign: 'right', fontWeight: '600', fontSize: '11px', letterSpacing: '0.5px' }}>Rate</th>
+                  <th style={{ background: '#1a1a2e', color: '#fff', padding: '8px 6px', textAlign: 'center', fontWeight: '600', fontSize: '11px', letterSpacing: '0.5px' }}>Qty</th>
+                  <th style={{ background: '#1a1a2e', color: '#fff', padding: '8px 6px', textAlign: 'right', fontWeight: '600', fontSize: '11px', letterSpacing: '0.5px' }}>Amount</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {items.map((item, i) => (
+                  <tr key={i} style={{ borderBottom: '1px solid #e8e0d0' }}>
+                    <td style={{ padding: '9px 6px', textAlign: 'center', color: '#888' }}>{item.sno}</td>
+                    <td style={{ padding: '9px 6px', color: '#333' }}>{item.detail}</td>
+                    <td style={{ padding: '9px 6px', textAlign: 'right', color: '#333' }}>{item.rate.toLocaleString()}</td>
+                    <td style={{ padding: '9px 6px', textAlign: 'center', color: '#333' }}>{item.qty}</td>
+                    <td style={{ padding: '9px 6px', textAlign: 'right', fontWeight: '600', color: '#1a1a2e' }}>{item.amount.toLocaleString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-          <div style={{ fontSize: '13px', borderTop: '1px solid #ccc', paddingTop: '8px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-              <strong>TOTAL:</strong>
-              <strong>Rs. {total.toLocaleString()}</strong>
+          <div style={{ height: '1px', background: '#e8e0d0', margin: '0 24px' }}></div>
+
+          {/* Totals */}
+          <div style={{ padding: '14px 24px', fontSize: '13px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <span style={{ color: '#666' }}>TOTAL:</span>
+              <span style={{ fontWeight: '700', fontSize: '14px', color: '#1a1a2e' }}>Rs. {total.toLocaleString()}</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-              <span>Advance Received:</span>
-              <span>Rs. {advanceReceived.toLocaleString()}</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <span style={{ color: '#666' }}>Advance Received:</span>
+              <span style={{ color: '#333' }}>Rs. {advanceReceived.toLocaleString()}</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #ccc', paddingTop: '4px', fontWeight: 'bold', fontSize: '15px' }}>
-              <span>REMAINING:</span>
-              <span>Rs. {remaining.toLocaleString()}</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '2px solid #C9A55C', paddingTop: '8px' }}>
+              <span style={{ fontWeight: '700', fontSize: '14px', color: '#1a1a2e' }}>REMAINING:</span>
+              <span style={{ fontWeight: '700', fontSize: '15px', color: '#C9A55C' }}>Rs. {remaining.toLocaleString()}</span>
             </div>
           </div>
 
-          <div style={{ marginTop: '30px', borderTop: '1px solid #ccc', paddingTop: '8px', fontSize: '11px', color: '#888', textAlign: 'center' }}>
-            Thank you for your business!
+          {/* Thank You + Branding */}
+          <div style={{ background: '#faf8f4', padding: '16px 24px', borderTop: '1px solid #e8e0d0' }}>
+            <div style={{ fontSize: '12px', color: '#888', textAlign: 'center', marginBottom: '10px' }}>
+              Thank you for choosing Rajput Furniture House!
+            </div>
+
+            {/* Furniture icons row */}
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', marginBottom: '10px', opacity: 0.15 }}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1a1a2e" strokeWidth="1.5">
+                <path d="M3 20V14h18v6M5 14V8a2 2 0 012-2h10a2 2 0 012 2v6M3 14h18"/>
+                <path d="M4 20v2M20 20v2M8 20v2M16 20v2"/>
+              </svg>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1a1a2e" strokeWidth="1.5">
+                <rect x="3" y="10" width="18" height="10" rx="1"/>
+                <path d="M7 10V7a5 5 0 0110 0v3"/>
+                <path d="M8 14h8M8 17h5"/>
+              </svg>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1a1a2e" strokeWidth="1.5">
+                <path d="M4 21V8l8-5 8 5v13"/>
+                <rect x="9" y="14" width="6" height="7"/>
+                <path d="M9 10h6"/>
+              </svg>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1a1a2e" strokeWidth="1.5">
+                <rect x="2" y="12" width="20" height="9" rx="1"/>
+                <path d="M6 12V9a2 2 0 012-2h8a2 2 0 012 2v3"/>
+                <line x1="2" y1="16" x2="22" y2="16"/>
+              </svg>
+            </div>
+
+            {/* Bottom watermark */}
+            <div style={{ textAlign: 'center', opacity: 0.08 }}>
+              <div style={{ fontSize: '14px', fontWeight: '800', letterSpacing: '2px', color: '#1a1a2e' }}>RAJPUT FURNITURE HOUSE</div>
+              <div style={{ fontSize: '9px', marginTop: '2px', color: '#1a1a2e' }}>Crafting Quality Furniture Since Years</div>
+            </div>
           </div>
 
-          <div style={{ marginTop: '30px', textAlign: 'center' }}>
-            <div style={{ fontSize: '18px', fontWeight: 'bold', opacity: 0.12, letterSpacing: '1px', lineHeight: '1.3' }}>
-              RAJPUT FURNITURE HOUSE
-            </div>
-            <div style={{ fontSize: '10px', opacity: 0.10, marginTop: '4px' }}>
-              Muhammad Abbas: 0300-8583823 | Junaid Abbas: 0318-6497054
-            </div>
-          </div>
         </div>
-      </div>
       </div>
     </div>
   )
