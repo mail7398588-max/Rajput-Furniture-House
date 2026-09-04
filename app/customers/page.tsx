@@ -8,7 +8,7 @@ import Modal from '@/components/Modal'
 import Pagination from '@/components/Pagination'
 import { useToast } from '@/components/Toast'
 import { exportToCSV } from '@/lib/export'
-import { Plus, Search, Edit, Trash2, Download } from 'lucide-react'
+import { Plus, Search, Edit, Trash2, Download, Eye, X } from 'lucide-react'
 
 const ROWS_PER_PAGE = 15
 
@@ -46,6 +46,7 @@ export default function CustomersPage() {
   const [form, setForm] = useState(emptyCustomer)
   const [page, setPage] = useState(1)
   const { toast } = useToast()
+  const [viewItemsCustomer, setViewItemsCustomer] = useState<Customer | null>(null)
 
   useEffect(() => {
     fetchCustomers()
@@ -59,7 +60,7 @@ export default function CustomersPage() {
         .order('created_at', { ascending: false })
       if (error) throw error
       setCustomers((data || []) as Customer[])
-    } catch (err) {
+    } catch {
       toast('Failed to load customers', 'error')
     } finally {
       setLoading(false)
@@ -110,7 +111,7 @@ export default function CustomersPage() {
       }
       setModalOpen(false)
       await fetchCustomers()
-    } catch (err) {
+    } catch {
       toast('Operation failed', 'error')
     } finally {
       setSaving(false)
@@ -125,7 +126,7 @@ export default function CustomersPage() {
       if (error) throw error
       toast('Customer deleted', 'success')
       await fetchCustomers()
-    } catch (err) {
+    } catch {
       toast('Delete failed', 'error')
     } finally {
       setSaving(false)
@@ -146,16 +147,6 @@ export default function CustomersPage() {
   const totalPages = Math.max(1, Math.ceil(filtered.length / ROWS_PER_PAGE))
   const paged = filtered.slice((page - 1) * ROWS_PER_PAGE, page * ROWS_PER_PAGE)
 
-  function handleSearchChange(value: string) {
-    setSearch(value)
-    setPage(1)
-  }
-
-  function handleStatusChange(value: string) {
-    setFilterStatus(value)
-    setPage(1)
-  }
-
   function handleExport() {
     if (filtered.length === 0) {
       toast('No data to export', 'error')
@@ -166,7 +157,7 @@ export default function CustomersPage() {
   }
 
   return (
-    <div>
+    <div className="p-6 lg:p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="page-title">Customer Register</h1>
@@ -174,7 +165,7 @@ export default function CustomersPage() {
         </div>
         <div className="flex gap-2">
           <button onClick={handleExport} className="btn-secondary flex items-center gap-2">
-            <Download size={16} /> Download CSV
+            <Download size={16} /> CSV
           </button>
           <button onClick={openAdd} className="btn-primary flex items-center gap-2">
             <Plus size={16} /> Add Customer
@@ -185,18 +176,18 @@ export default function CustomersPage() {
       <div className="stat-card mb-6">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1 relative">
-            <Search size={16} className="absolute left-3 top-2.5 text-gray-400" />
+            <Search size={16} className="absolute left-3 top-2.5 text-warm-400" />
             <input
               type="text"
               placeholder="Search by name, order no, phone, item..."
               value={search}
-              onChange={(e) => handleSearchChange(e.target.value)}
+              onChange={(e) => { setSearch(e.target.value); setPage(1) }}
               className="input-field pl-10"
             />
           </div>
           <select
             value={filterStatus}
-            onChange={(e) => handleStatusChange(e.target.value)}
+            onChange={(e) => { setFilterStatus(e.target.value); setPage(1) }}
             className="input-field w-auto"
           >
             <option value="All">All Status</option>
@@ -210,73 +201,97 @@ export default function CustomersPage() {
       </div>
 
       <div className="stat-card overflow-x-auto">
-        <table className="w-full">
+        <table className="w-full min-w-[900px]">
           <thead>
             <tr className="table-header">
-              <th className="table-cell">S.No</th>
-              <th className="table-cell">Order No</th>
-              <th className="table-cell">Date</th>
+              <th className="table-cell w-12">S.No</th>
+              <th className="table-cell w-20">Order</th>
+              <th className="table-cell w-24">Date</th>
               <th className="table-cell">Customer</th>
-              <th className="table-cell">Phone</th>
-              <th className="table-cell">Item</th>
-              <th className="table-cell">Amount</th>
-              <th className="table-cell">Advance</th>
-              <th className="table-cell">Remaining</th>
-              <th className="table-cell">Delivery</th>
-              <th className="table-cell">Status</th>
-              <th className="table-cell">Actions</th>
+              <th className="table-cell w-28">Phone</th>
+              <th className="table-cell w-32">Items</th>
+              <th className="table-cell text-right">Amount</th>
+              <th className="table-cell text-right">Advance</th>
+              <th className="table-cell text-right">Remaining</th>
+              <th className="table-cell w-24">Delivery</th>
+              <th className="table-cell w-24">Status</th>
+              <th className="table-cell w-24">Actions</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={12} className="table-cell text-center text-gray-400 py-8">
-                  Loading...
+                <td colSpan={12} className="table-cell text-center py-8">
+                  <div className="flex items-center justify-center gap-2 text-warm-400">
+                    <div className="w-5 h-5 border-2 border-primary-300 border-t-primary-500 rounded-full animate-spin" />
+                    Loading...
+                  </div>
                 </td>
               </tr>
             ) : paged.length === 0 ? (
               <tr>
-                <td colSpan={12} className="table-cell text-center text-gray-400 py-8">
+                <td colSpan={12} className="table-cell text-center text-warm-400 py-8">
                   No customers found
                 </td>
               </tr>
             ) : (
               paged.map((c, i) => (
-                <tr key={c.id} className="border-t border-gray-100 hover:bg-gray-50">
-                  <td className="table-cell">{(page - 1) * ROWS_PER_PAGE + i + 1}</td>
-                  <td className="table-cell font-medium">{c.order_no}</td>
-                  <td className="table-cell">
+                <tr key={c.id} className="border-t border-warm-100 hover:bg-warm-50/50 transition-colors">
+                  <td className="table-cell text-warm-500">{(page - 1) * ROWS_PER_PAGE + i + 1}</td>
+                  <td className="table-cell font-semibold text-warm-900">{c.order_no}</td>
+                  <td className="table-cell text-warm-600">
                     {c.order_date ? new Date(c.order_date).toLocaleDateString('en-PK') : '-'}
                   </td>
-                  <td className="table-cell">{c.customer_name}</td>
-                  <td className="table-cell">{c.phone}</td>
-                  <td className="table-cell">{c.item}</td>
-                  <td className="table-cell">Rs. {(c.order_amount || 0).toLocaleString()}</td>
-                  <td className="table-cell">Rs. {(c.advance || 0).toLocaleString()}</td>
-                  <td className="table-cell">Rs. {(c.remaining || 0).toLocaleString()}</td>
+                  <td className="table-cell font-medium text-warm-800">{c.customer_name}</td>
+                  <td className="table-cell text-warm-600">{c.phone || '-'}</td>
                   <td className="table-cell">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-warm-700 truncate max-w-[120px] text-xs">
+                        {c.item || '-'}
+                      </span>
+                      {c.details && (
+                        <button
+                          onClick={() => setViewItemsCustomer(c)}
+                          className="p-1 rounded-lg bg-primary-50 text-primary-600 hover:bg-primary-100 transition-colors flex-shrink-0"
+                          title="View all items"
+                        >
+                          <Eye size={14} />
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                  <td className="table-cell text-right font-semibold text-warm-900">
+                    Rs. {(c.order_amount || 0).toLocaleString()}
+                  </td>
+                  <td className="table-cell text-right text-green-600">
+                    Rs. {(c.advance || 0).toLocaleString()}
+                  </td>
+                  <td className="table-cell text-right font-medium text-warm-800">
+                    Rs. {(c.remaining || 0).toLocaleString()}
+                  </td>
+                  <td className="table-cell text-warm-600">
                     {c.delivery_date ? new Date(c.delivery_date).toLocaleDateString('en-PK') : '-'}
                   </td>
                   <td className="table-cell">
-                    <span className={`status-badge ${statusColors[c.status] || 'bg-gray-100 text-gray-800'}`}>
+                    <span className={`status-badge ${statusColors[c.status] || 'bg-warm-100 text-warm-800'}`}>
                       {c.status}
                     </span>
                   </td>
                   <td className="table-cell">
-                    <div className="flex gap-2">
+                    <div className="flex gap-1.5">
                       <button
                         onClick={() => openEdit(c)}
                         disabled={saving}
-                        className="text-blue-600 hover:text-blue-800 disabled:opacity-50"
+                        className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 disabled:opacity-50 transition-colors"
                       >
-                        <Edit size={16} />
+                        <Edit size={15} />
                       </button>
                       <button
                         onClick={() => handleDelete(c.id)}
                         disabled={saving}
-                        className="text-red-600 hover:text-red-800 disabled:opacity-50"
+                        className="p-1.5 rounded-lg text-red-600 hover:bg-red-50 disabled:opacity-50 transition-colors"
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={15} />
                       </button>
                     </div>
                   </td>
@@ -293,6 +308,49 @@ export default function CustomersPage() {
         )}
       </div>
 
+      {/* View Items Modal */}
+      <Modal
+        isOpen={!!viewItemsCustomer}
+        onClose={() => setViewItemsCustomer(null)}
+        title={`Items - ${viewItemsCustomer?.customer_name || ''}`}
+      >
+        {viewItemsCustomer && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="text-warm-500">Order No:</span>
+                <p className="font-semibold text-warm-900">{viewItemsCustomer.order_no}</p>
+              </div>
+              <div>
+                <span className="text-warm-500">Phone:</span>
+                <p className="font-semibold text-warm-900">{viewItemsCustomer.phone || '-'}</p>
+              </div>
+              <div>
+                <span className="text-warm-500">Item:</span>
+                <p className="font-semibold text-warm-900">{viewItemsCustomer.item || '-'}</p>
+              </div>
+              <div>
+                <span className="text-warm-500">Amount:</span>
+                <p className="font-semibold text-warm-900">Rs. {(viewItemsCustomer.order_amount || 0).toLocaleString()}</p>
+              </div>
+            </div>
+            <div className="border-t border-warm-100 pt-4">
+              <span className="text-warm-500 text-sm font-semibold">Details / Specifications:</span>
+              <div className="mt-2 p-4 bg-warm-50 rounded-xl text-sm text-warm-800 whitespace-pre-wrap leading-relaxed">
+                {viewItemsCustomer.details || 'No details added'}
+              </div>
+            </div>
+            {viewItemsCustomer.notes && (
+              <div className="border-t border-warm-100 pt-4">
+                <span className="text-warm-500 text-sm font-semibold">Notes:</span>
+                <p className="mt-1 text-sm text-warm-700">{viewItemsCustomer.notes}</p>
+              </div>
+            )}
+          </div>
+        )}
+      </Modal>
+
+      {/* Add/Edit Modal */}
       <Modal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -359,12 +417,13 @@ export default function CustomersPage() {
             </select>
           </div>
           <div className="col-span-2">
-            <label className="label-text">Details / Specs</label>
+            <label className="label-text">Details / Items List</label>
             <textarea
               className="input-field"
-              rows={2}
+              rows={3}
               value={form.details || ''}
               onChange={(e) => setForm({ ...form, details: e.target.value })}
+              placeholder="e.g., 5 Seater Corner Sofa + Kitchen Cabin + Console + Bed Dressing..."
             />
           </div>
           <div>

@@ -20,9 +20,7 @@ interface DashboardStats {
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 function formatPKR(value: number): string {
-  if (value >= 100000) return `PKR ${(value / 100000).toFixed(1)}L`
-  if (value >= 1000) return `PKR ${(value / 1000).toFixed(1)}K`
-  return `PKR ${value.toLocaleString()}`
+  return `Rs. ${value.toLocaleString()}`
 }
 
 function getLast6Months(): string[] {
@@ -45,32 +43,35 @@ export default function Home() {
       try {
         const last6 = getLast6Months()
 
-        const [ordersRes, transactionsRes] = await Promise.all([
-          db()
-            .from('orders')
-            .select('id, order_no, total_expense, created_at, customers(order_amount, status, order_date)'),
-          db()
-            .from('transactions')
-            .select('income, expense, category, date'),
+        const [customersRes, ordersRes, transactionsRes] = await Promise.all([
+          db().from('customers').select('order_amount, status, order_date'),
+          db().from('orders').select('total_expense, order_no'),
+          db().from('transactions').select('income, expense, category, date'),
         ])
 
+        if (customersRes.error) throw customersRes.error
         if (ordersRes.error) throw ordersRes.error
         if (transactionsRes.error) throw transactionsRes.error
 
+        const customers = (customersRes.data as any[]) || []
         const orders = (ordersRes.data as any[]) || []
         const transactions = (transactionsRes.data as any[]) || []
+
+        const ordersMap: Record<string, number> = {}
+        for (const o of orders) {
+          ordersMap[o.order_no] = Number(o.total_expense) || 0
+        }
 
         let totalRevenue = 0
         let totalExpenses = 0
         let activeOrders = 0
 
-        for (const order of orders) {
-          const amount = Number(order.customers?.order_amount) || 0
-          const expense = Number(order.total_expense) || 0
-          totalRevenue += amount
+        for (const c of customers) {
+          totalRevenue += Number(c.order_amount) || 0
+          const expense = ordersMap[c.order_no] || 0
           totalExpenses += expense
 
-          const status = order.customers?.status
+          const status = c.status
           if (status === 'In Progress' || status === 'Pending') {
             activeOrders++
           }
@@ -81,14 +82,14 @@ export default function Home() {
           monthlyMap[m] = { revenue: 0, expenses: 0 }
         }
 
-        for (const order of orders) {
-          const orderDate = order.customers?.order_date
+        for (const c of customers) {
+          const orderDate = c.order_date
           if (!orderDate) continue
           const d = new Date(orderDate)
           const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
           if (monthlyMap[key]) {
-            monthlyMap[key].revenue += Number(order.customers?.order_amount) || 0
-            monthlyMap[key].expenses += Number(order.total_expense) || 0
+            monthlyMap[key].revenue += Number(c.order_amount) || 0
+            monthlyMap[key].expenses += ordersMap[c.order_no] || 0
           }
         }
 
@@ -156,7 +157,7 @@ export default function Home() {
   if (!stats) return null
 
   return (
-    <div className="p-8">
+    <div className="p-6 lg:p-8">
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-1">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
