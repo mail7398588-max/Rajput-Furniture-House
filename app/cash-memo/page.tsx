@@ -244,35 +244,107 @@ export default function CashMemoPage() {
 
       {/* Print Layout */}
       <div className="print-only" ref={printRef}>
-        <div style={{ maxWidth: '520px', margin: '0 auto', padding: '0', fontFamily: "'Segoe UI', Arial, sans-serif", color: '#1a1a1a', background: '#fff' }}>
+        <div style={{ maxWidth: '540px', margin: '0 auto', fontFamily: "'Segoe UI', Arial, sans-serif", color: '#1a1a1a', background: '#fff', position: 'relative', overflow: 'hidden' }}>
 
-          {/* Header with decorative border */}
-          <div style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)', color: '#fff', padding: '20px 24px', textAlign: 'center', borderRadius: '0 0 8px 8px' }}>
-            <div style={{ fontSize: '10px', letterSpacing: '4px', textTransform: 'uppercase', opacity: 0.7, marginBottom: '4px' }}>Welcome to</div>
-            <h1 style={{ fontSize: '24px', fontWeight: '800', margin: 0, letterSpacing: '1px' }}>RAJPOOT FURNITURE HOUSE</h1>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: '8px', fontSize: '11px', opacity: 0.85 }}>
-              <span>Muhammad Abbas: 0300-8583823</span>
-              <span style={{ opacity: 0.4 }}>|</span>
-              <span>Junaid Abbas: 0318-6497054</span>
+          {/* Background decorative pattern */}
+          <div style={{ position: 'absolute', top: 0, right: 0, width: '220px', height: '220px', background: 'radial-gradient(circle at top right, rgba(201,165,92,0.08) 0%, transparent 70%)', pointerEvents: 'none' }}></div>
+          <div style={{ position: 'absolute', bottom: 0, left: 0, width: '180px', height: '180px', background: 'radial-gradient(circle at bottom left, rgba(26,26,46,0.04) 0%, transparent 70%)', pointerEvents: 'none' }}></div>
+
+          {/* Top Section - Header with Sofa */}
+          <div style={{ display: 'flex', alignItems: 'stretch', minHeight: '180px' }}>
+            {/* Left - Branding */}
+            <div style={{ flex: 1, padding: '28px 20px 20px 28px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+              <div style={{ fontSize: '10px', letterSpacing: '5px', textTransform: 'uppercase', color: '#C9A55C', fontWeight: '600', marginBottom: '4px' }}>Welcome to</div>
+              <h1 style={{ fontSize: '28px', fontWeight: '800', margin: 0, color: '#1a1a2e', lineHeight: '1.1', letterSpacing: '-0.5px' }}>RAJPOOT</h1>
+              <h1 style={{ fontSize: '28px', fontWeight: '800', margin: 0, color: '#1a1a2e', lineHeight: '1.1', letterSpacing: '-0.5px' }}>FURNITURE</h1>
+              <div style={{ width: '50px', height: '3px', background: 'linear-gradient(90deg, #C9A55C, #FFC726)', margin: '10px 0', borderRadius: '2px' }}></div>
+              <div style={{ fontSize: '10px', color: '#888', lineHeight: '1.6' }}>
+                Muhammad Abbas: 0300-8583823<br/>
+                Junaid Abbas: 0318-6497054
+              </div>
+            </div>
+
+            {/* Right - 3D Sofa SVG */}
+            <div style={{ width: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+              <svg width="190" height="150" viewBox="0 0 190 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+                {/* Shadow */}
+                <ellipse cx="95" cy="140" rx="80" ry="8" fill="rgba(0,0,0,0.08)"/>
+                {/* Sofa back - tufted */}
+                <path d="M30 55 C30 30, 50 18, 95 18 C140 18, 160 30, 160 55 L160 85 C160 88, 158 90, 155 90 L35 90 C32 90, 30 88, 30 85 Z" fill="url(#sofaBack)"/>
+                {/* Tufting lines */}
+                <path d="M55 28 L55 82" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/>
+                <path d="M75 22 L75 82" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/>
+                <path d="M95 20 L95 82" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/>
+                <path d="M115 22 L115 82" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/>
+                <path d="M135 28 L135 82" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/>
+                {/* Tufting buttons */}
+                <circle cx="55" cy="45" r="2.5" fill="rgba(201,165,92,0.4)"/>
+                <circle cx="75" cy="42" r="2.5" fill="rgba(201,165,92,0.4)"/>
+                <circle cx="95" cy="40" r="2.5" fill="rgba(201,165,92,0.4)"/>
+                <circle cx="115" cy="42" r="2.5" fill="rgba(201,165,92,0.4)"/>
+                <circle cx="135" cy="45" r="2.5" fill="rgba(201,165,92,0.4)"/>
+                {/* Sofa seat */}
+                <path d="M22 85 L22 105 C22 110, 26 113, 30 113 L160 113 C164 113, 168 110, 168 105 L168 85 Z" fill="url(#sofaSeat)"/>
+                {/* Seat cushion line */}
+                <path d="M95 88 L95 110" stroke="rgba(0,0,0,0.08)" strokeWidth="1"/>
+                {/* Left armrest */}
+                <path d="M12 55 C8 55, 5 60, 5 70 L5 105 C5 112, 10 115, 16 115 L22 115 L22 55 Z" fill="url(#armrest)"/>
+                {/* Right armrest */}
+                <path d="M178 55 C182 55, 185 60, 185 70 L185 105 C185 112, 180 115, 174 115 L168 115 L168 55 Z" fill="url(#armrest)"/>
+                {/* Legs */}
+                <rect x="30" y="113" width="6" height="16" rx="1.5" fill="#8B7355"/>
+                <rect x="154" y="113" width="6" height="16" rx="1.5" fill="#8B7355"/>
+                <rect x="75" y="113" width="5" height="14" rx="1.5" fill="#8B7355"/>
+                <rect x="110" y="113" width="5" height="14" rx="1.5" fill="#8B7355"/>
+                {/* Cushion highlight */}
+                <path d="M35 90 Q95 80, 155 90" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" fill="none"/>
+                {/* Pillows */}
+                <ellipse cx="50" cy="65" rx="18" ry="14" fill="url(#pillow1)" opacity="0.9"/>
+                <ellipse cx="140" cy="65" rx="18" ry="14" fill="url(#pillow2)" opacity="0.9"/>
+                <defs>
+                  <linearGradient id="sofaBack" x1="95" y1="18" x2="95" y2="90">
+                    <stop offset="0%" stopColor="#F5F0E8"/>
+                    <stop offset="100%" stopColor="#E8DFD0"/>
+                  </linearGradient>
+                  <linearGradient id="sofaSeat" x1="95" y1="85" x2="95" y2="113">
+                    <stop offset="0%" stopColor="#EDE5D8"/>
+                    <stop offset="100%" stopColor="#DDD4C4"/>
+                  </linearGradient>
+                  <linearGradient id="armrest" x1="0" y1="55" x2="0" y2="115">
+                    <stop offset="0%" stopColor="#F0E8DC"/>
+                    <stop offset="100%" stopColor="#DDD4C4"/>
+                  </linearGradient>
+                  <linearGradient id="pillow1" x1="50" y1="51" x2="50" y2="79">
+                    <stop offset="0%" stopColor="#C9A55C"/>
+                    <stop offset="100%" stopColor="#B8944A"/>
+                  </linearGradient>
+                  <linearGradient id="pillow2" x1="140" y1="51" x2="140" y2="79">
+                    <stop offset="0%" stopColor="#1a1a2e"/>
+                    <stop offset="100%" stopColor="#16213e"/>
+                  </linearGradient>
+                </defs>
+              </svg>
             </div>
           </div>
 
-          {/* Decorative line */}
-          <div style={{ height: '3px', background: 'linear-gradient(90deg, #C9A55C, #FFC726, #C9A55C)' }}></div>
+          {/* Gold accent line */}
+          <div style={{ height: '4px', background: 'linear-gradient(90deg, #C9A55C 0%, #FFC726 50%, #C9A55C 100%)' }}></div>
 
-          {/* Title */}
-          <div style={{ textAlign: 'center', padding: '16px 24px 8px' }}>
-            <h2 style={{ fontSize: '18px', fontWeight: '700', color: '#1a1a2e', margin: 0, letterSpacing: '3px' }}>CASH MEMO</h2>
-            <div style={{ width: '60px', height: '2px', background: '#C9A55C', margin: '6px auto 0' }}></div>
+          {/* CASH MEMO Title */}
+          <div style={{ padding: '18px 28px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+            <div>
+              <h2 style={{ fontSize: '22px', fontWeight: '800', color: '#1a1a2e', margin: 0, letterSpacing: '4px' }}>CASH MEMO</h2>
+              <div style={{ width: '40px', height: '2px', background: '#C9A55C', marginTop: '4px' }}></div>
+            </div>
+            <div style={{ textAlign: 'right', fontSize: '12px' }}>
+              <div><strong style={{ color: '#1a1a2e' }}>Invoice:</strong> <span style={{ color: '#555' }}>{memoNo}</span></div>
+              <div><strong style={{ color: '#1a1a2e' }}>Date:</strong> <span style={{ color: '#555' }}>{memoDate}</span></div>
+            </div>
           </div>
 
-          {/* Memo Info */}
-          <div style={{ padding: '0 24px 14px', fontSize: '12.5px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
-              <span><strong style={{ color: '#1a1a2e' }}>Memo No:</strong> <span style={{ color: '#555' }}>{memoNo}</span></span>
-              <span><strong style={{ color: '#1a1a2e' }}>Date:</strong> <span style={{ color: '#555' }}>{memoDate}</span></span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+          {/* Customer Info */}
+          <div style={{ padding: '0 28px 14px', fontSize: '12.5px' }}>
+            <div style={{ display: 'flex', gap: '40px', marginBottom: '4px' }}>
               <span><strong style={{ color: '#1a1a2e' }}>Name:</strong> <span style={{ color: '#555' }}>{selectedOrder?.customer_name || '___________________________'}</span></span>
               <span><strong style={{ color: '#1a1a2e' }}>Order No:</strong> <span style={{ color: '#555' }}>{selectedOrder?.order_no || '___________'}</span></span>
             </div>
@@ -281,98 +353,65 @@ export default function CashMemoPage() {
             </div>
           </div>
 
-          <div style={{ height: '1px', background: '#e8e0d0', margin: '0 24px' }}></div>
+          <div style={{ height: '1px', background: 'linear-gradient(90deg, transparent, #e0d8c8, transparent)', margin: '0 28px' }}></div>
 
           {/* Items Table */}
-          <div style={{ padding: '14px 24px' }}>
+          <div style={{ padding: '14px 28px' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
               <thead>
                 <tr>
-                  <th style={{ background: '#1a1a2e', color: '#fff', padding: '8px 6px', textAlign: 'center', fontWeight: '600', fontSize: '11px', letterSpacing: '0.5px' }}>S.No</th>
-                  <th style={{ background: '#1a1a2e', color: '#fff', padding: '8px 6px', textAlign: 'left', fontWeight: '600', fontSize: '11px', letterSpacing: '0.5px' }}>Detail</th>
-                  <th style={{ background: '#1a1a2e', color: '#fff', padding: '8px 6px', textAlign: 'right', fontWeight: '600', fontSize: '11px', letterSpacing: '0.5px' }}>Rate</th>
-                  <th style={{ background: '#1a1a2e', color: '#fff', padding: '8px 6px', textAlign: 'center', fontWeight: '600', fontSize: '11px', letterSpacing: '0.5px' }}>Qty</th>
-                  <th style={{ background: '#1a1a2e', color: '#fff', padding: '8px 6px', textAlign: 'right', fontWeight: '600', fontSize: '11px', letterSpacing: '0.5px' }}>Amount</th>
+                  <th style={{ background: '#1a1a2e', color: '#fff', padding: '10px 8px', textAlign: 'center', fontWeight: '600', fontSize: '10px', letterSpacing: '1px', textTransform: 'uppercase', borderRadius: '4px 0 0 0' }}>#</th>
+                  <th style={{ background: '#1a1a2e', color: '#fff', padding: '10px 8px', textAlign: 'left', fontWeight: '600', fontSize: '10px', letterSpacing: '1px', textTransform: 'uppercase' }}>Description</th>
+                  <th style={{ background: '#1a1a2e', color: '#fff', padding: '10px 8px', textAlign: 'center', fontWeight: '600', fontSize: '10px', letterSpacing: '1px', textTransform: 'uppercase' }}>Qty</th>
+                  <th style={{ background: '#1a1a2e', color: '#fff', padding: '10px 8px', textAlign: 'right', fontWeight: '600', fontSize: '10px', letterSpacing: '1px', textTransform: 'uppercase' }}>Rate</th>
+                  <th style={{ background: '#1a1a2e', color: '#fff', padding: '10px 8px', textAlign: 'right', fontWeight: '600', fontSize: '10px', letterSpacing: '1px', textTransform: 'uppercase', borderRadius: '0 4px 0 0' }}>Total</th>
                 </tr>
               </thead>
               <tbody>
                 {items.map((item, i) => (
-                  <tr key={i} style={{ borderBottom: '1px solid #e8e0d0' }}>
-                    <td style={{ padding: '9px 6px', textAlign: 'center', color: '#888' }}>{item.sno}</td>
-                    <td style={{ padding: '9px 6px', color: '#333' }}>{item.detail}</td>
-                    <td style={{ padding: '9px 6px', textAlign: 'right', color: '#333' }}>{item.rate.toLocaleString()}</td>
-                    <td style={{ padding: '9px 6px', textAlign: 'center', color: '#333' }}>{item.qty}</td>
-                    <td style={{ padding: '9px 6px', textAlign: 'right', fontWeight: '600', color: '#1a1a2e' }}>{item.amount.toLocaleString()}</td>
+                  <tr key={i} style={{ borderBottom: '1px solid #f0ebe0' }}>
+                    <td style={{ padding: '10px 8px', textAlign: 'center', color: '#C9A55C', fontWeight: '700', fontSize: '13px' }}>{item.sno}</td>
+                    <td style={{ padding: '10px 8px', color: '#333', fontSize: '12px' }}>{item.detail}</td>
+                    <td style={{ padding: '10px 8px', textAlign: 'center', color: '#555', fontWeight: '600' }}>{item.qty}</td>
+                    <td style={{ padding: '10px 8px', textAlign: 'right', color: '#555' }}>{item.rate.toLocaleString()}</td>
+                    <td style={{ padding: '10px 8px', textAlign: 'right', fontWeight: '700', color: '#1a1a2e', fontSize: '12.5px' }}>{item.amount.toLocaleString()}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
 
-          <div style={{ height: '1px', background: '#e8e0d0', margin: '0 24px' }}></div>
+          <div style={{ height: '1px', background: 'linear-gradient(90deg, transparent, #e0d8c8, transparent)', margin: '0 28px' }}></div>
 
           {/* Totals */}
-          <div style={{ padding: '14px 24px', fontSize: '13px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <span style={{ color: '#666' }}>TOTAL:</span>
-              <span style={{ fontWeight: '700', fontSize: '14px', color: '#1a1a2e' }}>Rs. {total.toLocaleString()}</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <span style={{ color: '#666' }}>Advance Received:</span>
-              <span style={{ color: '#333' }}>Rs. {advanceReceived.toLocaleString()}</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '2px solid #C9A55C', paddingTop: '8px' }}>
-              <span style={{ fontWeight: '700', fontSize: '14px', color: '#1a1a2e' }}>REMAINING:</span>
-              <span style={{ fontWeight: '700', fontSize: '15px', color: '#C9A55C' }}>Rs. {remaining.toLocaleString()}</span>
+          <div style={{ padding: '14px 28px', display: 'flex', justifyContent: 'flex-end' }}>
+            <div style={{ width: '220px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '12.5px' }}>
+                <span style={{ color: '#888' }}>Subtotal</span>
+                <span style={{ fontWeight: '600', color: '#333' }}>Rs. {total.toLocaleString()}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '12.5px' }}>
+                <span style={{ color: '#888' }}>Advance Received</span>
+                <span style={{ color: '#555' }}>Rs. {advanceReceived.toLocaleString()}</span>
+              </div>
+              <div style={{ borderTop: '2px solid #C9A55C', paddingTop: '8px', marginTop: '4px', display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ fontWeight: '700', fontSize: '14px', color: '#1a1a2e' }}>REMAINING</span>
+                <span style={{ fontWeight: '800', fontSize: '16px', color: '#C9A55C' }}>Rs. {remaining.toLocaleString()}</span>
+              </div>
             </div>
           </div>
 
-          {/* Thank You + Branding */}
-          <div style={{ background: '#faf8f4', padding: '16px 24px', borderTop: '1px solid #e8e0d0' }}>
-            <div style={{ fontSize: '12px', color: '#888', textAlign: 'center', marginBottom: '10px' }}>
+          {/* Footer */}
+          <div style={{ background: '#faf8f4', padding: '18px 28px', borderTop: '1px solid #f0ebe0' }}>
+            <div style={{ fontSize: '11px', color: '#999', textAlign: 'center', marginBottom: '12px', fontStyle: 'italic' }}>
               Thank you for choosing Rajput Furniture House!
             </div>
 
-            {/* Furniture icons row */}
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '28px', marginBottom: '10px', opacity: 0.18 }}>
-              {/* Sofa */}
-              <svg width="32" height="28" viewBox="0 0 32 28" fill="none" stroke="#1a1a2e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 18v4M28 18v4"/>
-                <path d="M6 18V12a2 2 0 012-2h16a2 2 0 012 2v6"/>
-                <path d="M2 16a3 3 0 013-3h22a3 3 0 013 3v2H2v-2z"/>
-                <path d="M6 12V9a1 1 0 011-1h3a1 1 0 011 1v3"/>
-                <path d="M21 12V9a1 1 0 011-1h3a1 1 0 011 1v3"/>
-              </svg>
-              {/* Bed */}
-              <svg width="32" height="28" viewBox="0 0 32 28" fill="none" stroke="#1a1a2e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="2" y="14" width="28" height="8" rx="1"/>
-                <path d="M4 14v-3a2 2 0 012-2h4a2 2 0 012 2v3"/>
-                <path d="M20 14v-3a2 2 0 012-2h4a2 2 0 012 2v3"/>
-                <line x1="2" y1="22" x2="2" y2="25"/>
-                <line x1="30" y1="22" x2="30" y2="25"/>
-                <line x1="2" y1="18" x2="30" y2="18"/>
-              </svg>
-              {/* Chair */}
-              <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#1a1a2e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M8 2V10"/>
-                <path d="M20 2V10"/>
-                <path d="M6 10h16a1 1 0 011 1v4a1 1 0 01-1 1H6a1 1 0 01-1-1v-4a1 1 0 011-1z"/>
-                <path d="M7 16v9M21 16v9"/>
-                <path d="M10 16v4h8v-4"/>
-              </svg>
-              {/* Dining Table */}
-              <svg width="30" height="28" viewBox="0 0 30 28" fill="none" stroke="#1a1a2e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="4" y="10" width="22" height="3" rx="1"/>
-                <line x1="7" y1="13" x2="6" y2="25"/>
-                <line x1="23" y1="13" x2="24" y2="25"/>
-                <line x1="15" y1="13" x2="15" y2="25"/>
-              </svg>
-            </div>
-
-            {/* Bottom watermark */}
-            <div style={{ textAlign: 'center', opacity: 0.08 }}>
-              <div style={{ fontSize: '14px', fontWeight: '800', letterSpacing: '2px', color: '#1a1a2e' }}>RAJPUT FURNITURE HOUSE</div>
-              <div style={{ fontSize: '9px', marginTop: '2px', color: '#1a1a2e' }}>Crafting Quality Furniture Since Years</div>
+            {/* Bottom branding bar */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', padding: '10px 0', borderTop: '1px solid #e8e0d0' }}>
+              <div style={{ width: '30px', height: '1px', background: '#C9A55C' }}></div>
+              <div style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '3px', color: '#1a1a2e', textTransform: 'uppercase' }}>Rajput Furniture House</div>
+              <div style={{ width: '30px', height: '1px', background: '#C9A55C' }}></div>
             </div>
           </div>
 
