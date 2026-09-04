@@ -33,16 +33,16 @@ export default function FloatingScrollBar({ containerRef }: { containerRef: Reac
     if (!container || !scrollbar) return
 
     function syncFromContainer() {
-      if (syncing.current) return
+      if (syncing.current || !scrollbar) return
       syncing.current = true
       scrollbar.scrollLeft = container!.scrollLeft
       syncing.current = false
     }
 
     function syncFromScrollbar() {
-      if (syncing.current) return
+      if (syncing.current || !container) return
       syncing.current = true
-      container!.scrollLeft = scrollbar.scrollLeft
+      container.scrollLeft = scrollbar!.scrollLeft
       syncing.current = false
     }
 
