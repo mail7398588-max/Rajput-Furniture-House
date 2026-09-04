@@ -70,30 +70,30 @@
   }
 
   .floating-scrollbar-wrapper {
-    @apply fixed bottom-0 left-0 right-0 z-50 px-4 pb-3 pointer-events-none;
+    @apply fixed bottom-0 left-0 right-0 z-50 px-6 pb-3 pointer-events-none;
     display: flex;
     justify-content: center;
   }
 
   .floating-scrollbar-track {
-    @apply h-2.5 rounded-full pointer-events-auto;
-    width: min(85vw, 700px);
-    background: rgba(250, 240, 220, 0.92);
+    @apply h-2 rounded-full pointer-events-auto;
+    width: min(80vw, 600px);
+    background: rgba(250, 240, 220, 0.95);
     backdrop-filter: blur(8px);
-    border: 1px solid rgba(201, 165, 92, 0.35);
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  .floating-scrollbar-track::-webkit-scrollbar {
-    display: none;
+    border: 1px solid rgba(201, 165, 92, 0.3);
+    position: relative;
+    overflow: hidden;
   }
 
   .floating-scrollbar-thumb {
-    @apply h-full rounded-full;
+    @apply h-full rounded-full absolute top-0 cursor-grab;
     background: linear-gradient(90deg, #C9A55C, #FFC726, #C9A55C);
-    width: 40%;
-    min-width: 50px;
+    min-width: 40px;
+    touch-action: none;
+  }
+
+  .floating-scrollbar-thumb:active {
+    cursor: grabbing;
   }
 
   .status-badge {
