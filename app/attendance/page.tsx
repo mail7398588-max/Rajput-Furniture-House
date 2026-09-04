@@ -309,13 +309,14 @@ export default function AttendancePage() {
         <div className="stat-card"><p className="text-xs text-warm-500 uppercase font-semibold">Total Net Payable</p><p className="text-lg font-bold text-green-600">Rs. {totalNet.toLocaleString()}</p></div>
       </div>
 
-      <div className="stat-card overflow-x-auto">
-        {loading ? (
-          <div className="text-center py-8"><div className="w-8 h-8 border-3 border-primary-200 border-t-primary-500 rounded-full animate-spin mx-auto mb-2" /><p className="text-warm-400 text-sm">Loading...</p></div>
-        ) : records.length === 0 ? (
-          <div className="text-center text-warm-400 py-8">No workers for {selectedMonth} {selectedYear}. Click &quot;Add Worker&quot;.</div>
-        ) : (
-          <div className="min-w-max space-y-4">
+      <div className="stat-card p-0">
+        <div className="table-scroll-container max-h-[60vh]">
+          {loading ? (
+            <div className="text-center py-8"><div className="w-8 h-8 border-3 border-primary-200 border-t-primary-500 rounded-full animate-spin mx-auto mb-2" /><p className="text-warm-400 text-sm">Loading...</p></div>
+          ) : records.length === 0 ? (
+            <div className="text-center text-warm-400 py-8">No workers for {selectedMonth} {selectedYear}. Click &quot;Add Worker&quot;.</div>
+          ) : (
+            <div className="min-w-max space-y-4 p-4">
             {records.map((r) => {
               const pend = getPend(r)
               const totalOT = Object.values(pend.ot_data).reduce((s, v) => s + (v || 0), 0)
@@ -392,6 +393,7 @@ export default function AttendancePage() {
             })}
           </div>
         )}
+        </div>
       </div>
 
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title="Add Worker">
