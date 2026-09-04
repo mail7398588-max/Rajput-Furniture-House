@@ -174,95 +174,13 @@ export default function CashMemoPage() {
               </div>
             </div>
 
-            {/* Right - Realistic Sofa */}
-            <div style={{ width: '220px', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', paddingBottom: '10px', position: 'relative' }}>
-              <svg width="210" height="170" viewBox="0 0 210 170" fill="none" xmlns="http://www.w3.org/2000/svg">
-                {/* Shadow under sofa */}
-                <ellipse cx="105" cy="158" rx="85" ry="6" fill="rgba(0,0,0,0.06)"/>
-
-                {/* Sofa back - large rounded with tufted look */}
-                <path d="M28 60 C28 28, 55 12, 105 12 C155 12, 182 28, 182 60 L182 92 C182 96, 179 98, 175 98 L35 98 C31 98, 28 96, 28 92 Z" fill="url(#sofaBackGrad)"/>
-
-                {/* Back cushion highlights - curved lines for tufting */}
-                <path d="M50 25 Q50 55, 50 90" stroke="rgba(180,160,130,0.25)" strokeWidth="1.2" fill="none"/>
-                <path d="M75 18 Q75 55, 75 90" stroke="rgba(180,160,130,0.25)" strokeWidth="1.2" fill="none"/>
-                <path d="M105 16 Q105 55, 105 90" stroke="rgba(180,160,130,0.25)" strokeWidth="1.2" fill="none"/>
-                <path d="M135 18 Q135 55, 135 90" stroke="rgba(180,160,130,0.25)" strokeWidth="1.2" fill="none"/>
-                <path d="M160 25 Q160 55, 160 90" stroke="rgba(180,160,130,0.25)" strokeWidth="1.2" fill="none"/>
-
-                {/* Tufting diamond pattern */}
-                <path d="M62 40 L75 55 L62 70" stroke="rgba(160,140,110,0.15)" strokeWidth="0.8" fill="none"/>
-                <path d="M88 35 L100 50 L88 65" stroke="rgba(160,140,110,0.15)" strokeWidth="0.8" fill="none"/>
-                <path d="M118 35 L130 50 L118 65" stroke="rgba(160,140,110,0.15)" strokeWidth="0.8" fill="none"/>
-                <path d="M148 40 L160 55 L148 70" stroke="rgba(160,140,110,0.15)" strokeWidth="0.8" fill="none"/>
-
-                {/* Tufting buttons */}
-                <circle cx="62" cy="55" r="2" fill="rgba(180,155,110,0.35)"/>
-                <circle cx="88" cy="50" r="2" fill="rgba(180,155,110,0.35)"/>
-                <circle cx="105" cy="48" r="2" fill="rgba(180,155,110,0.35)"/>
-                <circle cx="118" cy="50" r="2" fill="rgba(180,155,110,0.35)"/>
-                <circle cx="148" cy="55" r="2" fill="rgba(180,155,110,0.35)"/>
-
-                {/* Sofa seat */}
-                <path d="M20 95 L20 120 C20 126, 25 130, 32 130 L178 130 C185 130, 190 126, 190 120 L190 95 Z" fill="url(#sofaSeatGrad)"/>
-
-                {/* Seat cushion dividers */}
-                <path d="M70 98 L70 127" stroke="rgba(160,140,110,0.15)" strokeWidth="1"/>
-                <path d="M105 97 L105 128" stroke="rgba(160,140,110,0.18)" strokeWidth="1"/>
-                <path d="M140 98 L140 127" stroke="rgba(160,140,110,0.15)" strokeWidth="1"/>
-
-                {/* Seat cushion top highlight */}
-                <path d="M30 98 Q105 88, 180 98" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" fill="none"/>
-
-                {/* Left armrest - rounded front */}
-                <path d="M10 52 C4 52, 0 58, 0 68 L0 118 C0 128, 6 132, 14 132 L22 132 L22 52 Z" fill="url(#armGrad)"/>
-                <path d="M10 52 C6 52, 3 56, 3 62 L3 115 C3 122, 7 125, 12 125" stroke="rgba(255,255,255,0.15)" strokeWidth="1" fill="none"/>
-
-                {/* Right armrest - rounded front */}
-                <path d="M200 52 C206 52, 210 58, 210 68 L210 118 C210 128, 204 132, 196 132 L188 132 L188 52 Z" fill="url(#armGrad)"/>
-                <path d="M200 52 C204 52, 207 56, 207 62 L207 115 C207 122, 203 125, 198 125" stroke="rgba(255,255,255,0.15)" strokeWidth="1" fill="none"/>
-
-                {/* Wooden legs */}
-                <rect x="32" y="130" width="7" height="18" rx="2" fill="url(#legGrad)"/>
-                <rect x="85" y="130" width="6" height="16" rx="2" fill="url(#legGrad)"/>
-                <rect x="119" y="130" width="6" height="16" rx="2" fill="url(#legGrad)"/>
-                <rect x="171" y="130" width="7" height="18" rx="2" fill="url(#legGrad)"/>
-
-                {/* Decorative pillows */}
-                <ellipse cx="52" cy="68" rx="20" ry="16" fill="url(#pillowGold)" transform="rotate(-8 52 68)"/>
-                <ellipse cx="158" cy="68" rx="20" ry="16" fill="url(#pillowDark)" transform="rotate(8 158 68)"/>
-                {/* Pillow highlights */}
-                <ellipse cx="50" cy="62" rx="10" ry="6" fill="rgba(255,255,255,0.12)" transform="rotate(-8 50 62)"/>
-                <ellipse cx="160" cy="62" rx="10" ry="6" fill="rgba(255,255,255,0.08)" transform="rotate(8 160 62)"/>
-
-                <defs>
-                  <linearGradient id="sofaBackGrad" x1="105" y1="12" x2="105" y2="98">
-                    <stop offset="0%" stopColor="#F8F3EB"/>
-                    <stop offset="50%" stopColor="#F0E8DA"/>
-                    <stop offset="100%" stopColor="#E6DCCB"/>
-                  </linearGradient>
-                  <linearGradient id="sofaSeatGrad" x1="105" y1="95" x2="105" y2="130">
-                    <stop offset="0%" stopColor="#EDE5D8"/>
-                    <stop offset="100%" stopColor="#DDD4C2"/>
-                  </linearGradient>
-                  <linearGradient id="armGrad" x1="0" y1="52" x2="22" y2="132">
-                    <stop offset="0%" stopColor="#F2EAE0"/>
-                    <stop offset="100%" stopColor="#DDD4C2"/>
-                  </linearGradient>
-                  <linearGradient id="legGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#A08060"/>
-                    <stop offset="100%" stopColor="#7A6045"/>
-                  </linearGradient>
-                  <linearGradient id="pillowGold" x1="52" y1="52" x2="52" y2="84">
-                    <stop offset="0%" stopColor="#D4B06A"/>
-                    <stop offset="100%" stopColor="#B8944A"/>
-                  </linearGradient>
-                  <linearGradient id="pillowDark" x1="158" y1="52" x2="158" y2="84">
-                    <stop offset="0%" stopColor="#2A2A42"/>
-                    <stop offset="100%" stopColor="#1A1A2E"/>
-                  </linearGradient>
-                </defs>
-              </svg>
+            {/* Right - Sofa Photo */}
+            <div style={{ width: '220px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px' }}>
+              <img
+                src="/sofa.jpg"
+                alt="Rajput Furniture Sofa"
+                style={{ width: '200px', height: '160px', objectFit: 'cover', borderRadius: '8px' }}
+              />
             </div>
           </div>
 
